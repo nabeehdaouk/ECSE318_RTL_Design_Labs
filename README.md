@@ -1,2 +1,5 @@
 # ECSE318_S
- Linking to Sigasi
+ This will be the codebase used for ECSE318 labs
+ 
+ DO NOT commit/push any non HDL files (.v for now)
+ UNLESS they are related to documentation
