@@ -33,7 +33,7 @@ assign {s_out_x0[4], s_out_x1[4], s_out_x2[4], s_out_x3[4], CI[0]}= 5'b00000;
         assign ab_x3[i] = y[i] & x[3];
         assign {c_out_x3[i], s_out_x3[i]}= ab_x3[i]+c_out_x2[i]+s_out_x2[i+1];
         
-        assign {CI[i+1], p[i+3]}=c_out_x3[i] + s_out_x3[i+1] +CI[i];
+        assign {CI[i+1], p[i+4]}=c_out_x3[i] + s_out_x3[i+1] +CI[i];
         
         assign p[0]= s_out_x0[0];
         assign p[1]= s_out_x1[0];
