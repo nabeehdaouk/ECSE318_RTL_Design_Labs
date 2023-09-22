@@ -10,8 +10,8 @@ module prob_six_behav(
     
 always @(posedge clk)
     begin
-        q1= E|(q1&~q2)|(q1&W);
-        q2= W|(q2&~q1)|(q2&E);
+        q1<= E|(q1&~q2)|(q1&W);
+        q2<= W|(q2&~q1)|(q2&E);
     end
     
 assign out=(~q1)&(~q2);
