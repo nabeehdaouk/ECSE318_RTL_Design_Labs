@@ -4,7 +4,7 @@ module csa_tb(
 
 );
     reg [7:0] a, b, c, d, e, f, g, h, i, j;
-    wire [16:0] s;
+    wire [17:0] s;
 
     csa csa_instance(
         .a(a),
