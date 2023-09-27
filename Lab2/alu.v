@@ -42,8 +42,8 @@ adder adder_instance(
     .CODE(alu_code[2:0]),
     .coe(1'b0), //ActiveLow
     .C(c),
-    .vout(vout),
-    .cout(cout)
+    .vout(vout), //no connection for now
+    .cout(cout)  //no connection for now
 );
     always @(*)
     begin: ALU
