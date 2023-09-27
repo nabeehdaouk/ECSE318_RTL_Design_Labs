@@ -35,6 +35,16 @@ module alu(
     localparam sne= 5'b11_101; //if A != B then C(15:0) = <0...0001>
 
 //Comb
+
+adder adder_instance(
+    .A(A),
+    .B(B),
+    .CODE(alu_code[2:0]),
+    .coe(1'b0), //ActiveLow
+    .C(c),
+    .vout(vout),
+    .cout(cout)
+);
     always @(*)
     begin: ALU
         case(alu_code)
