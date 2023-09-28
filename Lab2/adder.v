@@ -1,8 +1,8 @@
 module adder(
     input [15:0] A, B,
     input [2:0] CODE,
-    input  coe, //cin missing
-    output reg [15:0] C,
+    input cin, coe,
+    output [15:0] C,
     output reg vout, cout
 );
 
@@ -14,43 +14,70 @@ module adder(
     localparam inc= 3'b100; //A+1=>C    signed increment
     localparam dec= 3'b101; //A-1=>C   signed decrement
 
-    // Temporary storage for evaluating signed overflow
-    reg [16:0] C_temp;
+    // 
+    reg [15:0] Ain, Bin;
+    wire coutwire;
+
+    cla16bit cla16bit_instance(
+        .A(Ain),
+        .B(Bin),
+        .SUM(C),
+        .C_OUT(coutwire)
+    );
 
 
     always @ (*) begin
         case(CODE)
             add: begin
-            C_temp[16:0] = A + B;
-            vout = (A[15] == B[15]) && (C_temp[15] != A[15]);
-            {cout,C} = C_temp;
+                Ain = A;
+                Bin = B;
+                cout = (coe) ? coutwire : 1'b0;
+                vout = (Ain[15] == Bin[15]) && (C[15] != Ain[15]);
             end
+
             addu: begin
-            {cout, C} = A + B;
+                Ain = A;
+                Bin = B;
+                cout = (coe) ? coutwire : 1'b0;
+                vout = 1'b0;
             end
+
             sub: begin // Assuming A and B input in two's complement form
-            C_temp[16:0] = A - B;
-            vout = (A[15] == B[15]) && (C_temp[15] != A[15]);
-            {cout,C} = C_temp;
+                Ain = A;
+                Bin = ~B + 1'b1;
+                cout = (coe) ? coutwire : 1'b0;
+                vout = (Ain[15] == Bin[15]) && (C[15] != Ain[15]);
             end
+
             subu: begin
-            {cout, C} = A - B;
+                Ain = A;
+                Bin = ~B + 1'b1;
+                cout = (coe) ? coutwire : 1'b0;
+                vout = 1'b0;
             end
+
             inc: begin
-            C_temp = A + 1'b1;
-            vout = (A[15] == 1'b0) && (C_temp[15] != A[15]);
-            C = C_temp;
+                Ain = A;
+                Bin = 16'h0001;
+                cout = (coe) ? coutwire : 1'b0;
+                vout = (Ain[15] == Bin[15]) && (C[15] != Ain[15]);
             end
+
             dec: begin
-            C_temp = A - 1'b1;            
-            vout = (A[15] == 1'b0) && (C_temp[15] != A[15]);
-            C = C_temp;
+                Ain = A;
+                Bin = 16'hffff;
+                cout = (coe) ? coutwire : 1'b0;
+                vout = (Ain[15] == Bin[15]) && (C[15] != Ain[15]);
             end
+
             default: begin
-            vout = 1'b0;
-            {cout, C} = {17{1'b0}};
+                Ain = 16'h0000;
+                Bin = 16'h0000;
+                vout = 1'b0;
+                cout = 1'b0;
+                
             end
-    endcase
-end
+        endcase
+    end
 
 endmodule
