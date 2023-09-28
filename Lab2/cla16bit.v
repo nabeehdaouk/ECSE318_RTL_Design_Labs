@@ -1,6 +1,7 @@
 module cla16bit (
     input [15:0] A,      // 16-bit input A
     input [15:0] B,      // 16-bit input B
+    input cin,          
     output [15:0] SUM,   // 16-bit sum output
     output C_OUT         // Carry-out
 );
@@ -22,7 +23,7 @@ generate
 endgenerate
 
 // Calculate the carry-in signals
-assign C[0] = 1'b0; // Initial carry-in is 0
+assign C[0] = cin; // Initial carry-in is 0
 generate
     for (i = 0; i < 16; i = i + 1) begin
         assign C[i+1] = G[i] | (P[i] & C[i]);

@@ -45,7 +45,6 @@ module alu(
         .B(B),
         .CODE(alu_code[2:0]),
         .coe(coe), //ActiveLow
-        .cin(1'b0),
         .C(c),
         .vout(vout_wire), //no connection for now
         .cout(cout_wire) //no connection for now
