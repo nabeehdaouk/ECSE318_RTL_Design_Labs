@@ -2,9 +2,13 @@ module alu(
     input [15:0] A,
     input [15:0] B,
     input [4:0] alu_code,
-    output reg [15:0] C
+    input coe,
+    output reg [15:0] C,
+    output reg vout, cout
 );
     wire [15:0] c; //output of 16-bit Adder Module
+    wire vout_wire;
+    wire cout_wire;
 
     //Arithmatic Opperations
     localparam add= 5'b00_000; //A+B=>C    signed addition
@@ -34,45 +38,133 @@ module alu(
     localparam seq= 5'b11_100; //if A = B then C(15:0) = <0...0001>
     localparam sne= 5'b11_101; //if A != B then C(15:0) = <0...0001>
 
-//Comb
+    //Comb
 
-adder adder_instance(
-    .A(A),
-    .B(B),
-    .CODE(alu_code[2:0]),
-    .coe(1'b0), //ActiveLow
-    .C(c),
-    .vout(vout), //no connection for now
-    .cout(cout)  //no connection for now
-);
+    adder adder_instance(
+        .A(A),
+        .B(B),
+        .CODE(alu_code[2:0]),
+        .coe(coe), //ActiveLow
+        .cin(1'b0),
+        .C(c),
+        .vout(vout_wire), //no connection for now
+        .cout(cout_wire) //no connection for now
+    );
     always @(*)
     begin: ALU
         case(alu_code)
-            add: C=c;
-            addu:C=c;
-            sub: C=c;
-            subu:C=c;
-            inc: C=c;
-            dec: C=c;
+            add: begin
+                C=c;
+                vout=vout_wire;
+                cout=cout_wire;
+            end
+            addu:begin
+                C=c;
+                vout=vout_wire;
+                cout=cout_wire;
+            end
+            sub: begin
+                C=c;
+                vout=vout_wire;
+                cout=cout_wire;
+            end
+            subu:begin
+                C=c;
+                vout=vout_wire;
+                cout=cout_wire;
+            end
+            inc: begin
+                C=c;
+                vout=vout_wire;
+                cout=cout_wire;
+            end
+            dec: begin
+                C=c;
+                vout=vout_wire;
+                cout=cout_wire;
+            end
 
-            and_opp: C= A & B;
-            or_opp: C= A | B;
-            xor_opp: C= A ^ B;
-            not_opp: C= ~A;
+            and_opp: begin
+                C= A & B;
+                vout=1'b0;
+                cout=1'b0;
+                end
+            or_opp: begin
+                C= A | B;
+                vout=1'b0;
+                cout=1'b0;
+                end
+            xor_opp: begin
+                C= A ^ B;
+                vout=1'b0;
+                cout=1'b0;
+                end
+            not_opp: begin
+                C= ~A;
+                vout=1'b0;
+                cout=1'b0;
+            end
+            
+            
+            
+            sll: begin
+                C= A<<B[3:0];
+                vout=1'b0;
+                cout=1'b0;
+                end
+            srl: begin
+                C= A>>B[3:0];
+                vout=1'b0;
+                cout=1'b0;
+                end
+            sla: begin
+                C= A<<<B[3:0];
+                vout=1'b0;
+                cout=1'b0;
+                end
+            sra: begin
+                C= A>>>B[3:0];
+                vout=1'b0;
+                cout=1'b0;
+            end
+            
+            
+            
+            sle: begin
+                C= (A<=B)?16'h0001:16'h0000;
+                vout=1'b0;
+                cout=1'b0;
+                end
+            slt: begin
+                C= (A<B)?16'h0001:16'h0000;
+                vout=1'b0;
+                cout=1'b0;
+                end
+            sge: begin
+                C= (A>=B)?16'h0001:16'h0000;
+                vout=1'b0;
+                cout=1'b0;
+                end
+            sgt: begin
+                C= (A>B)?16'h0001:16'h0000;
+                vout=1'b0;
+                cout=1'b0;
+                end
+            seq: begin C= (A==B)?16'h0001:16'h0000;
+                vout=1'b0;
+                cout=1'b0;
+                end
+            sne: begin
+                C= (A!=B)?16'h0001:16'h0000;
+                vout=1'b0;
+                cout=1'b0;
+                end
 
-            sll: C= A<<B[3:0];
-            srl: C= A>>B[3:0];
-            sla: C= A<<<B[3:0];
-            sra: C= A>>>B[3:0];
-
-            sle: C= (A<=B)?1'h1:1'h0;
-            slt: C= (A<B)?1'h1:1'h0;
-            sge: C= (A>=B)?1'h1:1'h0;
-            sgt: C= (A>B)?1'h1:1'h0;
-            seq: C= (A==B)?1'h1:1'h0;
-            sne: C= (A!=B)?1'h1:1'h0;
-
-            default: C=1'h0;
+            default: begin
+                C=16'h0000;
+                vout=1'b0;
+                cout=1'b0;
+                end
         endcase
     end
 endmodule
