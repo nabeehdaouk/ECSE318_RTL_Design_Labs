@@ -1,9 +1,9 @@
 module alu(
-    input [15:0] A,
-    input [15:0] B,
+    input signed [15:0] A,
+    input signed [15:0] B,
     input [4:0] alu_code,
     input coe,
-    output reg [15:0] C,
+    output reg signed [15:0] C,
     output reg vout, cout
 );
     wire [15:0] c; //output of 16-bit Adder Module

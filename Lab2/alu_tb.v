@@ -66,7 +66,11 @@ module alu_tb;
         operation_list[19] = sne;     operation_names[19] = "sne";
 
         for (i = 0; i < 20; i = i + 1) begin
-            $display("-----------------------------------------------------------------------------------------");
+            //Inputs
+            A = 16'hA00A;
+            B = 16'h1004;
+            coe = 1'b0;
+            $display("_________________________________________________________________________________________________________________________________________________");
             CODE = operation_list[i];
             case(CODE)
                 add: $display("Testing operation:       ADD=%b    //A+B=>C    signed addition ", CODE);
@@ -82,7 +86,7 @@ module alu_tb;
                 sll: $display("Testing operation:       SLL=%b   //logic left shift A by the amount of B[3:0]     ", CODE);
                 srl: $display("Testing operation:       SRL=%b   //logic right shift A by the amount of B[3:0]    ", CODE);
                 sla: $display("Testing operation:       SLA=%b   //arithmetic left shift A by the amount of B[3:0]", CODE);
-                sra: $display("Testing operation:       SRA=%b   //arithmetic right shift A by the amount of B[3:0", CODE);
+                sra: $display("Testing operation:       SRA=%b   //arithmetic right shift A by the amount of B[3:0]", CODE);
                 sle: $display("Testing operation:       SLE=%b   //if A <= B then C(15:0) = <0...0001>", CODE);
                 slt: $display("Testing operation:       SLT=%b   //if A < B then C(15:0) = <0...0001> ", CODE);
                 sge: $display("Testing operation:       SGE=%b   //if A >= B then C(15:0) = <0...0001>", CODE);
@@ -90,15 +94,11 @@ module alu_tb;
                 seq: $display("Testing operation:       SEQ=%b   //if A = B then C(15:0) = <0...0001> ", CODE);
                 sne: $display("Testing operation:       SNE=%b   //if A != B then C(15:0) = <0...0001>", CODE);
             endcase
-            $display;
-            $display("Testing All Adder Functionality for inputs 0000 and 0001 Below:");
-            A = 16'h0000;
-            B = 16'h0001;
-            coe = 1'b0;
-            #100 $display("hex           INPUTS: A:%h                  B:%h                  CarryOutEn_L:%b      |   OUTPUTS: C:%h                   vout:%b   cout:%b", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
-                 $display("bin           INPUTS: A:%b      B:%b      CarryOutEn_L:%b      |   OUTPUTS: C:%b       vout:%b   cout:%b", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
-                 $display("dec(signed)   INPUTS: A:%d                B:%d                CarryOutEn_L:%b      |   OUTPUTS: C:%d                 vout:%b   cout:%b", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
-                 $display("dec(unsigned) INPUTS: A: %d                B: %d                CarryOutEn_L:%b      |   OUTPUTS: C: %d                 vout:%b   cout:%b", A, B,coe ,C, vout, cout);
+            $display("-------------------------------------------------------------------------------------------------------------------------------------------------|");
+            #100 $display("hex           INPUTS: A:%h                  B:%h                  CarryOutEn_L:%b      |   OUTPUTS: C:%h                   vout:%b   cout:%b  |", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
+                 $display("bin           INPUTS: A:%b      B:%b      CarryOutEn_L:%b      |   OUTPUTS: C:%b       vout:%b   cout:%b  |", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
+                 $display("dec(signed)   INPUTS: A:%d                B:%d                CarryOutEn_L:%b      |   OUTPUTS: C:%d                 vout:%b   cout:%b  |", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
+                 $display("dec(unsigned) INPUTS: A: %d                B: %d                CarryOutEn_L:%b      |   OUTPUTS: C: %d                 vout:%b   cout:%b  |", A, B,coe ,C, vout, cout);
                  
         end
     end
