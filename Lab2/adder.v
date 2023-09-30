@@ -28,13 +28,13 @@ module adder(
     );
 
 
-    always @ (*) begin
+    always @ (*) begin //A,B,coe,CODE, coutwire, cin synthesis
         case(CODE)
             add: begin
                 cin = 1'b0;
                 Ain = A;
                 Bin = B ^ {16{cin}};
-                cout = (coe) ? coutwire : 1'b0;
+                cout = (~coe) ? coutwire : 1'b0;
                 vout = (Ain[15] == Bin[15]) && (C[15] != Ain[15]);
             end
 
@@ -42,7 +42,7 @@ module adder(
                 cin = 1'b0;
                 Ain = A;
                 Bin = B ^ {16{cin}};
-                cout = (coe) ? coutwire : 1'b0;
+                cout = (~coe) ? coutwire : 1'b0;
                 vout = 1'b0;
             end
 
@@ -50,7 +50,7 @@ module adder(
                 cin = 1'b1;
                 Ain = A;
                 Bin = B ^ {16{cin}};
-                cout = (coe) ? coutwire : 1'b0;
+                cout = (~coe) ? coutwire : 1'b0;
                 vout = (Ain[15] == Bin[15]) && (C[15] != Ain[15]);
             end
 
@@ -58,7 +58,7 @@ module adder(
                 cin = 1'b1;
                 Ain = A;
                 Bin = B ^ {16{cin}};
-                cout = (coe) ? coutwire : 1'b0;
+                cout = (~coe) ? coutwire : 1'b0;
                 vout = 1'b0;
             end
 
@@ -66,7 +66,7 @@ module adder(
                 cin = 1'b0;
                 Ain = A;
                 Bin = 16'h0001 ^ {16{cin}};
-                cout = (coe) ? coutwire : 1'b0;
+                cout = (~coe) ? coutwire : 1'b0;
                 vout = (Ain[15] == Bin[15]) && (C[15] != Ain[15]);
             end
 
@@ -74,7 +74,7 @@ module adder(
                 cin = 1'b1;
                 Ain = A;
                 Bin = 16'h0001 ^ {16{cin}};
-                cout = (coe) ? coutwire : 1'b0;
+                cout = (~coe) ? coutwire : 1'b0;
                 vout = (Ain[15] == Bin[15]) && (C[15] != Ain[15]);
             end
 

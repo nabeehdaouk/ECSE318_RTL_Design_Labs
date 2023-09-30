@@ -69,6 +69,79 @@ module alu_tb;
             //Inputs
             A = 16'hA00A;
             B = 16'h1004;
+            coe = 1'b0; //active low
+            $display("_________________________________________________________________________________________________________________________________________________");
+            CODE = operation_list[i];
+            case(CODE)
+                add: $display("Testing operation:       ADD=%b    //A+B=>C    signed addition ", CODE);
+                addu: $display("Testing operation:      ADDU=%b   //A+B=>C    unsigned addition", CODE);
+                sub: $display("Testing operation:       SUB=%b    //A-B=>C    signed subtraction", CODE);
+                subu: $display("Testing operation:      SUBU=%b   //A-B=>C    unsigned subtraction", CODE);
+                inc: $display("Testing operation:       INC=%b    //A+1=>C    signed increment", CODE);
+                dec: $display("Testing operation:       DEC=%b   //A-1=>C   signed decrement  ", CODE);
+                and_opp: $display("Testing operation:   AND=%b   //A AND B",CODE);
+                or_opp: $display("Testing operation:    OR =%b   //A OR B ",CODE);
+                xor_opp: $display("Testing operation:   XOR=%b   //A XOR B", CODE);
+                not_opp: $display("Testing operation:   NOT=%b   //NOT A  ",CODE);
+                sll: $display("Testing operation:       SLL=%b   //logic left shift A by the amount of B[3:0]     ", CODE);
+                srl: $display("Testing operation:       SRL=%b   //logic right shift A by the amount of B[3:0]    ", CODE);
+                sla: $display("Testing operation:       SLA=%b   //arithmetic left shift A by the amount of B[3:0]", CODE);
+                sra: $display("Testing operation:       SRA=%b   //arithmetic right shift A by the amount of B[3:0]", CODE);
+                sle: $display("Testing operation:       SLE=%b   //if A <= B then C(15:0) = <0...0001>", CODE);
+                slt: $display("Testing operation:       SLT=%b   //if A < B then C(15:0) = <0...0001> ", CODE);
+                sge: $display("Testing operation:       SGE=%b   //if A >= B then C(15:0) = <0...0001>", CODE);
+                sgt: $display("Testing operation:       SGT=%b   //if A > B then C(15:0) = <0...0001> ", CODE);
+                seq: $display("Testing operation:       SEQ=%b   //if A = B then C(15:0) = <0...0001> ", CODE);
+                sne: $display("Testing operation:       SNE=%b   //if A != B then C(15:0) = <0...0001>", CODE);
+            endcase
+            $display("-------------------------------------------------------------------------------------------------------------------------------------------------|");
+            #100 $display("hex           INPUTS: A:%h                  B:%h                  CarryOutEn_L:%b      |   OUTPUTS: C:%h                   vout:%b   cout:%b  |", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
+                 $display("bin           INPUTS: A:%b      B:%b      CarryOutEn_L:%b      |   OUTPUTS: C:%b       vout:%b   cout:%b  |", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
+                 $display("dec(signed)   INPUTS: A:%d                B:%d                CarryOutEn_L:%b      |   OUTPUTS: C:%d                 vout:%b   cout:%b  |", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
+                 $display("dec(unsigned) INPUTS: A: %d                B: %d                CarryOutEn_L:%b      |   OUTPUTS: C: %d                 vout:%b   cout:%b  |", A, B,coe ,C, vout, cout);
+                 
+        end
+        
+        for (i = 0; i < 20; i = i + 1) begin
+            //Inputs
+            A = 16'hF14A;
+            B = 16'hF002;
+            coe = 1'b0;
+            $display("_________________________________________________________________________________________________________________________________________________");
+            CODE = operation_list[i];
+            case(CODE)
+                add: $display("Testing operation:       ADD=%b    //A+B=>C    signed addition ", CODE);
+                addu: $display("Testing operation:      ADDU=%b   //A+B=>C    unsigned addition", CODE);
+                sub: $display("Testing operation:       SUB=%b    //A-B=>C    signed subtraction", CODE);
+                subu: $display("Testing operation:      SUBU=%b   //A-B=>C    unsigned subtraction", CODE);
+                inc: $display("Testing operation:       INC=%b    //A+1=>C    signed increment", CODE);
+                dec: $display("Testing operation:       DEC=%b   //A-1=>C   signed decrement  ", CODE);
+                and_opp: $display("Testing operation:   AND=%b   //A AND B",CODE);
+                or_opp: $display("Testing operation:    OR =%b   //A OR B ",CODE);
+                xor_opp: $display("Testing operation:   XOR=%b   //A XOR B", CODE);
+                not_opp: $display("Testing operation:   NOT=%b   //NOT A  ",CODE);
+                sll: $display("Testing operation:       SLL=%b   //logic left shift A by the amount of B[3:0]     ", CODE);
+                srl: $display("Testing operation:       SRL=%b   //logic right shift A by the amount of B[3:0]    ", CODE);
+                sla: $display("Testing operation:       SLA=%b   //arithmetic left shift A by the amount of B[3:0]", CODE);
+                sra: $display("Testing operation:       SRA=%b   //arithmetic right shift A by the amount of B[3:0]", CODE);
+                sle: $display("Testing operation:       SLE=%b   //if A <= B then C(15:0) = <0...0001>", CODE);
+                slt: $display("Testing operation:       SLT=%b   //if A < B then C(15:0) = <0...0001> ", CODE);
+                sge: $display("Testing operation:       SGE=%b   //if A >= B then C(15:0) = <0...0001>", CODE);
+                sgt: $display("Testing operation:       SGT=%b   //if A > B then C(15:0) = <0...0001> ", CODE);
+                seq: $display("Testing operation:       SEQ=%b   //if A = B then C(15:0) = <0...0001> ", CODE);
+                sne: $display("Testing operation:       SNE=%b   //if A != B then C(15:0) = <0...0001>", CODE);
+            endcase
+            $display("-------------------------------------------------------------------------------------------------------------------------------------------------|");
+            #100 $display("hex           INPUTS: A:%h                  B:%h                  CarryOutEn_L:%b      |   OUTPUTS: C:%h                   vout:%b   cout:%b  |", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
+                 $display("bin           INPUTS: A:%b      B:%b      CarryOutEn_L:%b      |   OUTPUTS: C:%b       vout:%b   cout:%b  |", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
+                 $display("dec(signed)   INPUTS: A:%d                B:%d                CarryOutEn_L:%b      |   OUTPUTS: C:%d                 vout:%b   cout:%b  |", $signed(A), $signed(B),coe ,$signed(C), vout, cout);
+                 $display("dec(unsigned) INPUTS: A: %d                B: %d                CarryOutEn_L:%b      |   OUTPUTS: C: %d                 vout:%b   cout:%b  |", A, B,coe ,C, vout, cout);
+                 
+        end
+        for (i = 0; i < 20; i = i + 1) begin
+            //Inputs
+            A = 16'h8012;
+            B = 16'h8002;
             coe = 1'b0;
             $display("_________________________________________________________________________________________________________________________________________________");
             CODE = operation_list[i];
@@ -102,5 +175,7 @@ module alu_tb;
                  
         end
     end
+    
+    
 
 endmodule

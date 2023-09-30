@@ -49,7 +49,7 @@ module alu(
         .vout(vout_wire), //no connection for now
         .cout(cout_wire) //no connection for now
     );
-    always @(*)
+    always @(*) //alu_code | A | B | c for synthesis
     begin: ALU
         case(alu_code)
             add: begin
