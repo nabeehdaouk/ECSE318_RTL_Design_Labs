@@ -14,11 +14,11 @@ module memory(
     case(read_write)
         write_out:
         begin
-            data_out= mem_en? mem[address]: {32{1'bZ}};
+            data_out = mem_en ? mem[address]: {32{1'bZ}};
         end
         read_in:
         begin
-            mem[address]= mem_en? data_in: mem[address];
+            mem[address] = mem_en ? data_in: mem[address];
         end
         default:
         begin //do nothing
