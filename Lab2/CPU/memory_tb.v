@@ -40,7 +40,7 @@ memory memory_instance(
        
        // Reading data value
        mem_en = 1'b1;
-       read_write = 1'b1;
+       read_write = 1'b0;
        address = 12'h000;
        #clk_period;
        
