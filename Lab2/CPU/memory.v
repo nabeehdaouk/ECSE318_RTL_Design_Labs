@@ -6,19 +6,19 @@ module memory(
     input [31:0] data_in,
     output reg [31:0] data_out
 );
-    localparam write_out= 1'b0;
-    localparam read_in= 1'b1;
+    localparam write_out_mem= 1'b0;
+    localparam read_in_mem= 1'b1;
     reg [31:0] mem [4095:0];
 
     always @(posedge clk)
     case(read_write)
-        write_out:
+        write_out_mem:
         begin
-            data_out = mem_en ? mem[address]: {32{1'bZ}};
+            data_out <= mem_en ? mem[address]: {32{1'bZ}};
         end
-        read_in:
+        read_in_mem:
         begin
-            mem[address] = mem_en ? data_in: mem[address];
+            mem[address] <= mem_en ? data_in: mem[address];
         end
         default:
         begin //do nothing
