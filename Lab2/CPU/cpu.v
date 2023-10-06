@@ -1,12 +1,13 @@
 module cpu(
-    input clk,
+    input clk_in,
     input reset,
     input [31:0] data_in,
     output reg [31:0] data_out,
     output reg [11:0] address,
-    output reg read,
-    output reg write,
-    output reg carry
+    output reg read_write,
+    output reg mem_en,
+    output reg carry,
+    output reg [31:0] result
 );
 
     reg [31:0] file_reg [15:0];
@@ -17,10 +18,13 @@ module cpu(
 
     reg [31:0] opperand1;
     reg [31:0] opperand2;
-    reg [31:0] result;
     reg [11:0] branch_address;
     reg branch_valid;
+    reg clk_en;
     
+    wire clk;
+
+
 
     localparam FETCH=     3'b000;
     localparam DECODE=    3'b001;
@@ -47,9 +51,13 @@ module cpu(
     localparam Zero= 4'b0101;
     localparam NoCarry= 4'b0110;
     localparam Posotive= 4'b0111;
-    
+
+    localparam read_from_mem= 1'b0;
+    localparam write_to_mem= 1'b1;
 
 
+
+assign clk= (clk_en)? clk : 1'b0;
 
 
     //FETCH
@@ -79,63 +87,95 @@ module cpu(
                 case (IR[31:28]) //opcode
                     NOP:
                     begin
-                    result <= {32{1'b0}};
-                    carry <= 1'b0;
-                    branch_address <= {12{1'b0}};
-                    branch_valid <= 1'b0;
-                    read <= 1'b0;
-                    write<= 1'b0;
+                        mem_en<= 1'b0;
+                        address <= {12{1'b0}};
+                        result <= {32{1'b0}};
+                        carry <= 1'b0;
+                        branch_address <= {12{1'b0}};
+                        branch_valid <= 1'b0;
+                        clk_en=1'b1;
+
                     end
-                    LD: 
+                    LD:
                     begin
-                    read <= 1'b1;
-                    write<= 1'b0;
-                    address <= execute[10:0];
-                    result <= {32{1'b0}};
-                    carry <= 1'b0;
-                    branch_address <= 0;
-                    branch_valid <= 0;
+                        mem_en<= 1'b1;
+                        read_write<= read_from_mem;
+                        address <= IR[23:12]; //mem_source
+                        result <= {32{1'b0}};
+                        carry <= 1'b0;
+                        branch_address <= 0;
+                        branch_valid <= 0;
+                        clk_en=1'b1;
                     end
                     STR:
                     begin
+                        mem_en<= 1'b1;
+                        read_write<= write_to_mem;
+                        address <= IR[11:0]; //mem_dest
+                        result <= {32{1'b0}};
+                        carry <= 1'b0;
+                        branch_address <= 0;
+                        branch_valid <= 0;
+                        clk_en=1'b1;
                     end
                     XOR:
                     begin
+                        mem_en<= 1'b0;
                         result<= opperand1 ^ opperand2;
                         carry <= 1'b0;
                         branch_address <= {12{1'b0}};
                         branch_valid <= 1'b0;
-                        read_mem <= 1'b0;
+                        clk_en=1'b1;
                     end
                     ADD:
                     begin
+                        mem_en<= 1'b0;
                         {carry, result} <= opperand1 + opperand2;
                         branch_address <= {12{1'b0}};
                         branch_valid <= 1'b0;
-                        read_mem <= 1'b0;
+                        clk_en=1'b1;
                     end
-                    ROT: 
+                    ROT:
                     begin
                     end
                     SHF:
                     begin
                     end
-                    HLT: 
+                    HLT:
                     begin
+                        mem_en<= 1'b0;
+                        address <= {12{1'b0}};
+                        result <= {32{1'b0}};
+                        carry <= 1'b0;
+                        branch_address <= {12{1'b0}};
+                        branch_valid <= 1'b0;
+                        clk_en=1'b0;
                     end
                     CMP:
                     begin
+                        mem_en<= 1'b0;
+                        result<= ~opperand1 + 1;
+                        carry <= 1'b0;
+                        branch_address <= {12{1'b0}};
+                        branch_valid <= 1'b0;
+                        clk_en=1'b1;
                     end
-                    BRA: 
+                    BRA:
                     begin
                     end
                     default:
                     begin
-                        //no op here
+                        mem_en<= 1'b0;
+                        address <= {12{1'b0}};
+                        result <= {32{1'b0}};
+                        carry <= 1'b0;
+                        branch_address <= {12{1'b0}};
+                        branch_valid <= 1'b0;
+                        clk_en=1'b1;
                     end
-                    
-                    
-                    
+
+
+
                 endcase
 
             end
@@ -147,10 +187,10 @@ module cpu(
 
             WRITEBACK:
             begin
-                ADD:
-                file_reg[IR[15:12]<= result;
+                //ADD:
+                //file_reg[IR[15:12]<= result;
                 //PC to mem
-                ]
+                
             end
 
 
