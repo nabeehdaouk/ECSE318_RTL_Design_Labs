@@ -78,19 +78,30 @@ module cpu(
         end
     end
 
-    assign clk= (clk_en)? clk : 1'b0;
+
+    assign clk= (clk_en)? clk : 1'b0; //for HALT
 
 
-    //FETCH
-    always @(posedge clk)
+    //5 CPU STAGES
+    always @(posedge clk, reset) //CPU_STAGES
+
     begin
-        case (IC)
+        case (IC) // @suppress "Default clause missing from case statement"
             FETCH:
             begin
                 if (reset == 1'b1)
                     begin
-                        IR<=0;
+                        mem_en<= 1'b0;
+                        address <= {12{1'b0}};
+                        result <= {32{1'b0}};
+                        carry <= 1'b0;
+                        branch_address <= {12{1'b0}};
+                        branch_valid <= 1'b0;
                         clk_en<=1'b1;
+                        PC<=0;
+                        opperand1<= 0;
+                        opperand2<= 0;
+                        IR<= 0;
                     end
                 else
                     begin
@@ -126,6 +137,10 @@ module cpu(
                     branch_address <= {12{1'b0}};
                     branch_valid <= 1'b0;
                     clk_en<=1'b1;
+                    PC<=0;
+                    opperand1<= 0;
+                    opperand2<= 0;
+                    IR<= 0;
                 end
                 begin
                     case (IR[31:28]) //opcode
@@ -156,6 +171,7 @@ module cpu(
                             mem_en<= 1'b1;
                             read_write<= write_to_mem;
                             address <= IR[11:0]; //mem_dest
+                            data_out<= opperand1; //source out to mem
                             result <= {32{1'b0}};
                             carry <= 1'b0;
                             branch_address <= 0;
@@ -181,11 +197,11 @@ module cpu(
                         end
                         ROT:
                         begin
-
+                            branch_valid <= 1'b0;
                         end
                         SHF:
                         begin
-
+                            branch_valid <= 1'b0;
                         end
                         HLT:
                         begin
@@ -219,72 +235,72 @@ module cpu(
                                 end
                                 Parity: begin //parity odd
                                     if (par == 1'b1)
-                                    begin
-                                        mem_en<= 1'b1;
-                                        read_write<= read_from_mem;
-                                        address <= IR[23:12]; //branch address
-                                        branch_valid <= 1'b1;
-                                    end
+                                        begin
+                                            mem_en<= 1'b1;
+                                            read_write<= read_from_mem;
+                                            address <= IR[23:12]; //branch address
+                                            branch_valid <= 1'b1;
+                                        end else begin branch_valid <= 1'b0; end
                                 end
                                 Even: begin //even
                                     if (evn == 1'b1)
-                                    begin
-                                        mem_en<= 1'b1;
-                                        read_write<= read_from_mem;
-                                        address <= IR[23:12]; //branch address
-                                        branch_valid <= 1'b1;
-                                    end
+                                        begin
+                                            mem_en<= 1'b1;
+                                            read_write<= read_from_mem;
+                                            address <= IR[23:12]; //branch address
+                                            branch_valid <= 1'b1;
+                                        end else begin branch_valid <= 1'b0; end
                                 end
                                 Carry: begin //carry
                                     if (cry == 1'b1)
-                                    begin
-                                        mem_en<= 1'b1;
-                                        read_write<= read_from_mem;
-                                        address <= IR[23:12]; //branch address
-                                        branch_valid <= 1'b1;
-                                    end
+                                        begin
+                                            mem_en<= 1'b1;
+                                            read_write<= read_from_mem;
+                                            address <= IR[23:12]; //branch address
+                                            branch_valid <= 1'b1;
+                                        end else begin branch_valid <= 1'b0; end
                                 end
                                 Negative: begin //neg
                                     if (neg == 1'b1)
-                                    begin
-                                        mem_en<= 1'b1;
-                                        read_write<= read_from_mem;
-                                        address <= IR[23:12]; //branch address
-                                        branch_valid <= 1'b1;
-                                    end
+                                        begin
+                                            mem_en<= 1'b1;
+                                            read_write<= read_from_mem;
+                                            address <= IR[23:12]; //branch address
+                                            branch_valid <= 1'b1;
+                                        end else begin branch_valid <= 1'b0; end
                                 end
                                 Zero: begin //zero
                                     if (zro == 1'b1)
-                                    begin
-                                        mem_en<= 1'b1;
-                                        read_write<= read_from_mem;
-                                        address <= IR[23:12]; //branch address
-                                        branch_valid <= 1'b1;
-                                    end
+                                        begin
+                                            mem_en<= 1'b1;
+                                            read_write<= read_from_mem;
+                                            address <= IR[23:12]; //branch address
+                                            branch_valid <= 1'b1;
+                                        end else begin branch_valid <= 1'b0; end
                                 end
                                 NoCarry: begin //no_carry
                                     if (cry == 1'b0)
-                                    begin
-                                        mem_en<= 1'b1;
-                                        read_write<= read_from_mem;
-                                        address <= IR[23:12]; //branch address
-                                        branch_valid <= 1'b1;
-                                    end
+                                        begin
+                                            mem_en<= 1'b1;
+                                            read_write<= read_from_mem;
+                                            address <= IR[23:12]; //branch address
+                                            branch_valid <= 1'b1;
+                                        end else begin branch_valid <= 1'b0; end
                                 end
                                 Positive: begin //pos
                                     if ((neg == 1'b0) && (zro == 1'b0))
-                                    begin
-                                        mem_en<= 1'b1;
-                                        read_write<= read_from_mem;
-                                        address <= IR[23:12]; //branch address
-                                        branch_valid <= 1'b1;
-                                    end
+                                        begin
+                                            mem_en<= 1'b1;
+                                            read_write<= read_from_mem;
+                                            address <= IR[23:12]; //branch address
+                                            branch_valid <= 1'b1;
+                                        end else begin branch_valid <= 1'b0; end
                                 end
-                                default: begin //default case is always, including when bit [27] is set
+                                default: begin //default case is no branch, including when bit [27] is set
                                     mem_en<= 1'b1;
                                     read_write<= read_from_mem;
                                     address <= IR[23:12]; //branch address
-                                    branch_valid <= 1'b1;
+                                    branch_valid <= 1'b0;
                                 end
                             endcase
 
@@ -307,13 +323,25 @@ module cpu(
             begin
                 if (reset ==1'b1)
                     begin
-
+                        mem_en<= 1'b0;
+                        address <= {12{1'b0}};
+                        result <= {32{1'b0}};
+                        carry <= 1'b0;
+                        branch_address <= {12{1'b0}};
+                        branch_valid <= 1'b0;
+                        clk_en<=1'b1;
+                        PC<=0;
+                        opperand1<= 0;
+                        opperand2<= 0;
+                        IR<= 0;
                     end
+
                 else
                     begin
-
-
-
+                        if (IR[31:28] == STR)
+                        begin // @suppress "Empty if branch. Add a body or explanatory comment"
+                        // store taken care of above, need cycle time for str/ld
+                        end
                     end
 
 
@@ -321,15 +349,36 @@ module cpu(
 
             WRITEBACK:
             begin
-                //ADD:
-                //file_reg[IR[15:12]<= result;
-                //PC to mem
-                //INC PC or Load Jump from BRANCH
+                if (reset ==1'b1)
+                    begin
+                        mem_en<= 1'b0;
+                        address <= {12{1'b0}};
+                        result <= {32{1'b0}};
+                        carry <= 1'b0;
+                        branch_address <= {12{1'b0}};
+                        branch_valid <= 1'b0;
+                        clk_en<=1'b1;
+                        PC<=0;
+                        opperand1<= 0;
+                        opperand2<= 0;
+                        IR<= 0;
+                    end
+                else if (IR[31:28] == LD)
+                    begin
+                        file_reg[IR[3:0]]<= data_in;
+                    end
+                else if ((IR[31:28] != STR) & (IR[31:28] != LD) & (IR[31:28] != NOP) & (IR[31:28] != BRA))
+                begin
+                    file_reg[IR[3:0]]<= result;
+                end
+                //inc PC and connect to mem for read in next fetch
+                PC = (branch_valid)? IR[11:0] : PC+1'b1;
+                address= PC;
+                mem_en<= 1'b1;
+                read_write<= read_from_mem;
             end
-
-
         endcase
-
     end
-
+    
+    
 endmodule
