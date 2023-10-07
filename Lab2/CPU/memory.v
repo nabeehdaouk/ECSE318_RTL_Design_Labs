@@ -21,7 +21,7 @@ module memory(
             begin
                 for (i=0; i<4096; i=i+1)
                     begin
-                        mem[i] = 32'b0;
+                        mem[i] = 32'h00000000;
                     end
             end
         else

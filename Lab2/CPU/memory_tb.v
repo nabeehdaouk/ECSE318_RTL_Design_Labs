@@ -20,7 +20,7 @@ module memory_tb();
 
     // Clock generation
     always begin
-        #20 clk = ~clk;
+        #10 clk = ~clk;
     end
 
 
@@ -29,18 +29,18 @@ module memory_tb();
         address = 12'h000;
         mem_en = 1'b0;
         clr_mem = 1'b0;
-        read_write = 1'b0;
+        read_write = 1'b1;
         data_in = 32'h0000000;
+        
+         #1000;
         $display("Initial Values:");
         $display("data_in: %h | data_out: %h", data_in, data_out);
         $display("\n");
         
-        #1000;
-        
         // Writing data value to memory
         mem_en = 1'b1;
         clr_mem = 1'b0;
-        read_write = 1'b0;
+        read_write = 1'b1;
         address = 12'h000;
         data_in = 32'hF0F0F0F0;
         #1000;
@@ -54,7 +54,7 @@ module memory_tb();
         // Reading data value
         mem_en = 1'b1;
         address = 12'h000;
-        read_write = 1'b1;
+        read_write = 1'b0;
         #1000;
         $display("Reading data_out:");
         $display("mem_en: %b | read_write: %b | data_out: %h", mem_en, read_write, data_out);
