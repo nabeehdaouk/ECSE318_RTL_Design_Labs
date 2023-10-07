@@ -5,7 +5,8 @@ module cpu(
     output reg [31:0] data_out, //to mem
     output reg [11:0] address, //to mem
     output reg read_write, //to mem
-    output reg mem_en //to mem
+    output reg mem_en, //to mem
+    output reg clr_mem
 
 );
 
@@ -80,7 +81,7 @@ module cpu(
 
 
     assign clk= (clk_en)? clk : 1'b0; //for HALT
-
+    assign clr_mem= 1'b0;
 
     //5 CPU STAGES
     always @(posedge clk, reset) //CPU_STAGES
