@@ -3,7 +3,7 @@ module cpu(
     input reset,
     input [31:0] data_in, //from mem
     output reg [31:0] data_out, //to mem
-    output reg [11:0] address,  //to mem
+    output reg [11:0] address, //to mem
     output reg read_write, //to mem
     output reg mem_en //to mem
 
@@ -208,6 +208,8 @@ module cpu(
                         end
                         BRA:
                         begin
+                            result <= {32{1'b0}};
+                            carry <= 1'b0;
                             case(IR[27:24])
                                 Always: begin //always
                                     mem_en<= 1'b1;
@@ -303,6 +305,17 @@ module cpu(
 
             MEMORY:
             begin
+                if (reset ==1'b1)
+                    begin
+
+                    end
+                else
+                    begin
+
+
+
+                    end
+
 
             end
 
@@ -311,7 +324,7 @@ module cpu(
                 //ADD:
                 //file_reg[IR[15:12]<= result;
                 //PC to mem
-
+                //INC PC or Load Jump from BRANCH
             end
 
 
