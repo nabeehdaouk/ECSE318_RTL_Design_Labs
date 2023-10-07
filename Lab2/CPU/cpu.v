@@ -58,25 +58,25 @@ module cpu(
     localparam write_to_mem= 1'b1;
 
     psr psr_instance(
-    .carry(carry),
-    .result(result),
-    .psr({zro, neg, evn, par, cry})
-);
+        .carry(carry),
+        .result(result),
+        .psr({zro, neg, evn, par, cry})
+    );
 
     always @(negedge clk, reset)
     begin: Instruction_Counter
-    if (reset == 1'b1)
-        begin
-            IC<= 3'b000;
-        end else begin
-        if (IC==3'b100)
+        if (reset == 1'b1)
             begin
                 IC<= 3'b000;
             end else begin
-            IC<= IC+3'b001;
+            if (IC==3'b100)
+                begin
+                    IC<= 3'b000;
+                end else begin
+                IC<= IC+3'b001;
+            end
         end
     end
-end
 
     assign clk= (clk_en)? clk : 1'b0;
 
@@ -87,242 +87,244 @@ end
         case (IC)
             FETCH:
             begin
-    if (reset == 1'b1)
-        begin
-            IR<=0;
-            clk_en<=1'b1;
-        end
-    else
-        begin
-            IR <= data_in;
-            clk_en<=1'b1;
-        end
-end
+                if (reset == 1'b1)
+                    begin
+                        IR<=0;
+                        clk_en<=1'b1;
+                    end
+                else
+                    begin
+                        IR <= data_in;
+                        clk_en<=1'b1;
+                    end
+            end
 
             DECODE:
             begin
-    if (reset == 1'b1)
-        begin
-            opperand1<= 0;
-            opperand2<= 0;
-            clk_en<=1'b1;
-        end
-    else
-        begin
-            opperand1<=(IR[27])?{{20{1'b0}},IR[23:12]} : file_reg[IR[15:12]]; //source
-            opperand2<=(IR[26])?{32{1'b0}} : file_reg[IR[15:12]]; //dest
-            clk_en<=1'b1;
-        end
-end
+                if (reset == 1'b1)
+                    begin
+                        opperand1<= 0;
+                        opperand2<= 0;
+                        clk_en<=1'b1;
+                    end
+                else
+                    begin
+                        opperand1<=(IR[27])?{{20{1'b0}},IR[23:12]} : file_reg[IR[15:12]]; //source
+                        opperand2<=(IR[26])?{32{1'b0}} : file_reg[IR[15:12]]; //dest
+                        clk_en<=1'b1;
+                    end
+            end
 
             EXECUTE:
             begin
-    if (reset == 1'b1)
-    begin
-        mem_en<= 1'b0;
-        address <= {12{1'b0}};
-        result <= {32{1'b0}};
-        carry <= 1'b0;
-        branch_address <= {12{1'b0}};
-        branch_valid <= 1'b0;
-        clk_en<=1'b1;
-    end
-    begin
-        case (IR[31:28]) //opcode
-            NOP:
-            begin
-                mem_en<= 1'b0;
-                address <= {12{1'b0}};
-                result <= {32{1'b0}};
-                carry <= 1'b0;
-                branch_address <= {12{1'b0}};
-                branch_valid <= 1'b0;
-                clk_en<=1'b1;
+                if (reset == 1'b1)
+                begin
+                    mem_en<= 1'b0;
+                    address <= {12{1'b0}};
+                    result <= {32{1'b0}};
+                    carry <= 1'b0;
+                    branch_address <= {12{1'b0}};
+                    branch_valid <= 1'b0;
+                    clk_en<=1'b1;
+                end
+                begin
+                    case (IR[31:28]) //opcode
+                        NOP:
+                        begin
+                            mem_en<= 1'b0;
+                            address <= {12{1'b0}};
+                            result <= {32{1'b0}};
+                            carry <= 1'b0;
+                            branch_address <= {12{1'b0}};
+                            branch_valid <= 1'b0;
+                            clk_en<=1'b1;
 
-            end
-            LD:
-            begin
-                mem_en<= 1'b1;
-                read_write<= read_from_mem;
-                address <= IR[23:12]; //mem_source
-                result <= {32{1'b0}};
-                carry <= 1'b0;
-                branch_address <= 0;
-                branch_valid <= 0;
-                clk_en<=1'b1;
-            end
-            STR:
-            begin
-                mem_en<= 1'b1;
-                read_write<= write_to_mem;
-                address <= IR[11:0]; //mem_dest
-                result <= {32{1'b0}};
-                carry <= 1'b0;
-                branch_address <= 0;
-                branch_valid <= 0;
-                clk_en<=1'b1;
-            end
-            XOR:
-            begin
-                mem_en<= 1'b0;
-                result<= opperand1 ^ opperand2;
-                carry <= 1'b0;
-                branch_address <= {12{1'b0}};
-                branch_valid <= 1'b0;
-                clk_en<=1'b1;
-            end
-            ADD:
-            begin
-                mem_en<= 1'b0;
-                {carry, result} <= opperand1 + opperand2;
-                branch_address <= {12{1'b0}};
-                branch_valid <= 1'b0;
-                clk_en<=1'b1;
-            end
-            ROT:
-            begin
+                        end
+                        LD:
+                        begin
+                            mem_en<= 1'b1;
+                            read_write<= read_from_mem;
+                            address <= IR[23:12]; //mem_source
+                            result <= {32{1'b0}};
+                            carry <= 1'b0;
+                            branch_address <= 0;
+                            branch_valid <= 0;
+                            clk_en<=1'b1;
+                        end
+                        STR:
+                        begin
+                            mem_en<= 1'b1;
+                            read_write<= write_to_mem;
+                            address <= IR[11:0]; //mem_dest
+                            result <= {32{1'b0}};
+                            carry <= 1'b0;
+                            branch_address <= 0;
+                            branch_valid <= 0;
+                            clk_en<=1'b1;
+                        end
+                        XOR:
+                        begin
+                            mem_en<= 1'b0;
+                            result<= opperand1 ^ opperand2;
+                            carry <= 1'b0;
+                            branch_address <= {12{1'b0}};
+                            branch_valid <= 1'b0;
+                            clk_en<=1'b1;
+                        end
+                        ADD:
+                        begin
+                            mem_en<= 1'b0;
+                            {carry, result} <= opperand1 + opperand2;
+                            branch_address <= {12{1'b0}};
+                            branch_valid <= 1'b0;
+                            clk_en<=1'b1;
+                        end
+                        ROT:
+                        begin
 
-            end
-            SHF:
-            begin
+                        end
+                        SHF:
+                        begin
 
-            end
-            HLT:
-            begin
-                mem_en<= 1'b0;
-                address <= {12{1'b0}};
-                result <= {32{1'b0}};
-                carry <= 1'b0;
-                branch_address <= {12{1'b0}};
-                branch_valid <= 1'b0;
-                clk_en<=1'b0;
-            end
-            CMP:
-            begin
-                mem_en<= 1'b0;
-                result<= ~opperand1 + 1;
-                carry <= 1'b0;
-                branch_address <= {12{1'b0}};
-                branch_valid <= 1'b0;
-                clk_en<=1'b1;
-            end
-            BRA:
-            begin
-                case(IR[27:24])
-                    Always: begin //always
-                        mem_en<= 1'b1;
-                        read_write<= read_from_mem;
-                        address <= IR[23:12]; //branch address
-                        branch_valid <= 1'b1;
-                    end
-                    Parity: begin //parity odd
-                        if (par == 1'b1)
-                        begin
-                            mem_en<= 1'b1;
-                            read_write<= read_from_mem;
-                            address <= IR[23:12]; //branch address
-                            branch_valid <= 1'b1;
                         end
-                    end
-                    Even: begin //even
-                        if (evn == 1'b1)
+                        HLT:
                         begin
-                            mem_en<= 1'b1;
-                            read_write<= read_from_mem;
-                            address <= IR[23:12]; //branch address
-                            branch_valid <= 1'b1;
+                            mem_en<= 1'b0;
+                            address <= {12{1'b0}};
+                            result <= {32{1'b0}};
+                            carry <= 1'b0;
+                            branch_address <= {12{1'b0}};
+                            branch_valid <= 1'b0;
+                            clk_en<=1'b0;
                         end
-                    end
-                    Carry: begin //carry
-                        if (cry == 1'b1)
+                        CMP:
                         begin
-                            mem_en<= 1'b1;
-                            read_write<= read_from_mem;
-                            address <= IR[23:12]; //branch address
-                            branch_valid <= 1'b1;
+                            mem_en<= 1'b0;
+                            result<= ~opperand1 + 1;
+                            carry <= 1'b0;
+                            branch_address <= {12{1'b0}};
+                            branch_valid <= 1'b0;
+                            clk_en<=1'b1;
                         end
-                    end
-                    Negative: begin //neg
-                        if (neg == 1'b1)
+                        BRA:
                         begin
-                            mem_en<= 1'b1;
-                            read_write<= read_from_mem;
-                            address <= IR[23:12]; //branch address
-                            branch_valid <= 1'b1;
-                        end
-                    end
-                    Zero: begin //zero
-                        if (zro == 1'b1)
-                        begin
-                            mem_en<= 1'b1;
-                            read_write<= read_from_mem;
-                            address <= IR[23:12]; //branch address
-                            branch_valid <= 1'b1;
-                        end
-                    end
-                    NoCarry: begin //no_carry
-                        if (cry == 1'b0)
-                        begin
-                            mem_en<= 1'b1;
-                            read_write<= read_from_mem;
-                            address <= IR[23:12]; //branch address
-                            branch_valid <= 1'b1;
-                        end
-                    end
-                    Positive: begin //pos
-                        if ((neg == 1'b0) && (zro == 1'b0))
-                        begin
-                            mem_en<= 1'b1;
-                            read_write<= read_from_mem;
-                            address <= IR[23:12]; //branch address
-                            branch_valid <= 1'b1;
-                        end
-                    end
-                    default: begin //default case is always, including when bit [27] is set
-                        mem_en<= 1'b1;
-                        read_write<= read_from_mem;
-                        address <= IR[23:12]; //branch address
-                        branch_valid <= 1'b1;
-                    end
-                endcase
+                            result <= {32{1'b0}};
+                            carry <= 1'b0;
+                            case(IR[27:24])
+                                Always: begin //always
+                                    mem_en<= 1'b1;
+                                    read_write<= read_from_mem;
+                                    address <= IR[23:12]; //branch address
+                                    branch_valid <= 1'b1;
+                                end
+                                Parity: begin //parity odd
+                                    if (par == 1'b1)
+                                    begin
+                                        mem_en<= 1'b1;
+                                        read_write<= read_from_mem;
+                                        address <= IR[23:12]; //branch address
+                                        branch_valid <= 1'b1;
+                                    end
+                                end
+                                Even: begin //even
+                                    if (evn == 1'b1)
+                                    begin
+                                        mem_en<= 1'b1;
+                                        read_write<= read_from_mem;
+                                        address <= IR[23:12]; //branch address
+                                        branch_valid <= 1'b1;
+                                    end
+                                end
+                                Carry: begin //carry
+                                    if (cry == 1'b1)
+                                    begin
+                                        mem_en<= 1'b1;
+                                        read_write<= read_from_mem;
+                                        address <= IR[23:12]; //branch address
+                                        branch_valid <= 1'b1;
+                                    end
+                                end
+                                Negative: begin //neg
+                                    if (neg == 1'b1)
+                                    begin
+                                        mem_en<= 1'b1;
+                                        read_write<= read_from_mem;
+                                        address <= IR[23:12]; //branch address
+                                        branch_valid <= 1'b1;
+                                    end
+                                end
+                                Zero: begin //zero
+                                    if (zro == 1'b1)
+                                    begin
+                                        mem_en<= 1'b1;
+                                        read_write<= read_from_mem;
+                                        address <= IR[23:12]; //branch address
+                                        branch_valid <= 1'b1;
+                                    end
+                                end
+                                NoCarry: begin //no_carry
+                                    if (cry == 1'b0)
+                                    begin
+                                        mem_en<= 1'b1;
+                                        read_write<= read_from_mem;
+                                        address <= IR[23:12]; //branch address
+                                        branch_valid <= 1'b1;
+                                    end
+                                end
+                                Positive: begin //pos
+                                    if ((neg == 1'b0) && (zro == 1'b0))
+                                    begin
+                                        mem_en<= 1'b1;
+                                        read_write<= read_from_mem;
+                                        address <= IR[23:12]; //branch address
+                                        branch_valid <= 1'b1;
+                                    end
+                                end
+                                default: begin //default case is always, including when bit [27] is set
+                                    mem_en<= 1'b1;
+                                    read_write<= read_from_mem;
+                                    address <= IR[23:12]; //branch address
+                                    branch_valid <= 1'b1;
+                                end
+                            endcase
 
+                        end
+                        default:
+                        begin
+                            mem_en<= 1'b0;
+                            address <= {12{1'b0}};
+                            result <= {32{1'b0}};
+                            carry <= 1'b0;
+                            branch_address <= {12{1'b0}};
+                            branch_valid <= 1'b0;
+                            clk_en<=1'b1;
+                        end
+                    endcase
+                end
             end
-            default:
-            begin
-                mem_en<= 1'b0;
-                address <= {12{1'b0}};
-                result <= {32{1'b0}};
-                carry <= 1'b0;
-                branch_address <= {12{1'b0}};
-                branch_valid <= 1'b0;
-                clk_en<=1'b1;
-            end
-        endcase
-    end
-end
 
             MEMORY:
             begin
                 if (reset ==1'b1)
-                begin
-                    
-                end
-            else
-                begin
-                    
-                    
-                    
-                end
-                
+                    begin
+
+                    end
+                else
+                    begin
+
+
+
+                    end
+
 
             end
 
-WRITEBACK:
+            WRITEBACK:
             begin
                 //ADD:
                 //file_reg[IR[15:12]<= result;
                 //PC to mem
-
+                //INC PC or Load Jump from BRANCH
             end
 
 
