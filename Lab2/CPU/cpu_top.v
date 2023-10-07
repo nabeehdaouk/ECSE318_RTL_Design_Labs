@@ -52,7 +52,8 @@ module cpu_top (
         .data_out(data_to_mem),
         .address(address_cpu_mem),
         .read_write(read_write_cpu),
-        .mem_en(mem_en_cpu)
+        .mem_en(mem_en_cpu),
+        .clr_mem(clr_mem_cpu)
     );
 
 
