@@ -18,12 +18,12 @@ module cpu_top (
     wire read_write_cpu;
 
     wire gated_clk;
-    wire gated_address;
-    wire gated_data_to_mem;
+    wire [11:0] gated_address;
+    wire [31:0] gated_data_to_mem;
     wire gated_clr_mem;
     wire gated_read_write;
     wire gated_mem_en;
-    wire gated_data_to_cpu;
+    wire [31:0] gated_data_to_cpu;
 
 
 
