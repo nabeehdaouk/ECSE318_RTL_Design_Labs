@@ -19,24 +19,27 @@ module memory(
     begin
         if (clr_mem == 1'b1)
             begin
-                for (i=0; i<4096; i=i+1) begin
-                    mem[i] = 32'b0;
-                end
-            end else begin
-            case(read_write)
-                write_out_mem:
-                begin
-                    data_out <= mem_en ? mem[address]: {32{1'bZ}};
-                end
-                read_in_mem:
-                begin
-                    mem[address] <= mem_en ? data_in: mem[address];
-                end
-                default:
-                begin //do nothing
-                end
-            endcase
-        end
+                for (i=0; i<4096; i=i+1)
+                    begin
+                        mem[i] = 32'b0;
+                    end
+            end
+        else
+            begin
+                case(read_write)
+                    write_out_mem:
+                    begin
+                        data_out <= mem_en ? mem[address]: {32{1'bZ}};
+                    end
+                    read_in_mem:
+                    begin
+                        mem[address] <= mem_en ? data_in: mem[address];
+                    end
+                    default:
+                    begin //do nothing
+                    end
+                endcase
+            end
     end
 
 endmodule
