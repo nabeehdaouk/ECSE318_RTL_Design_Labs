@@ -6,7 +6,7 @@ module cpu(
     output reg [11:0] address, //to mem
     output reg read_write, //to mem
     output reg mem_en, //to mem
-    output reg clr_mem
+    output clr_mem
 
 );
 
