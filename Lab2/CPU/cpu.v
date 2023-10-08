@@ -64,7 +64,7 @@ module cpu(
         .psr({zro, neg, evn, par, cry})
     );
 
-    always @(negedge clk, reset)
+    always @(negedge clk, posedge reset)
     begin: Instruction_Counter
         if (reset == 1'b1)
             begin
@@ -339,10 +339,10 @@ module cpu(
 
                 else
                     begin
-                        if (IR[31:28] == STR)
-                        begin // @suppress "Empty if branch. Add a body or explanatory comment"
-                        // store taken care of above, need cycle time for str/ld
-                        end
+                        PC = (branch_valid)? IR[11:0] : PC+1'b1;
+                        address= PC;
+                        mem_en<= 1'b1;
+                        read_write<= read_from_mem;
                     end
 
 
@@ -373,13 +373,10 @@ module cpu(
                     file_reg[IR[3:0]]<= result;
                 end
                 //inc PC and connect to mem for read in next fetch
-                PC = (branch_valid)? IR[11:0] : PC+1'b1;
-                address= PC;
-                mem_en<= 1'b1;
-                read_write<= read_from_mem;
+
             end
         endcase
     end
-    
-    
+
+
 endmodule

@@ -61,7 +61,7 @@ module cpu_top_tb ();
         #20
         reset= 1'b0;
         
-        #100
+        #200
 
 
         //        data_in = 32'h76543210;

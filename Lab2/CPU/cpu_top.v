@@ -23,7 +23,7 @@ module cpu_top (
     wire gated_clr_mem;
     wire gated_read_write;
     wire gated_mem_en;
-    wire [31:0] gated_data_to_cpu;
+   
 
 
 
