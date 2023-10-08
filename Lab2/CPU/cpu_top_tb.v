@@ -64,10 +64,22 @@ module cpu_top_tb ();
         address = 12'h004;
         #20
 
-        data_in = 32'b1001_0_0_00_000000000011_000000000011; //CMP REG4, result in 4
+//        data_in = 32'b1001_0_0_00_000000000011_000000000011; //CMP REG4, result in 4
+//        read_write = 1'b1;
+//        address = 12'h005;
+//        #20
+
+        data_in = 32'b0111_0_0_00_000000000101_000000001011; //SHF REG11 by 5, result in REG11
         read_write = 1'b1;
         address = 12'h005;
         #20
+
+        data_in = 32'b0111_0_0_00_100000000101_000000001011; //SHF REG11 by -5, result in REG11
+        read_write = 1'b1;
+        address = 12'h005;
+        #20
+
+
 
         data_in = 32'h0000000a; //data value
         read_write = 1'b1;
@@ -86,7 +98,7 @@ module cpu_top_tb ();
         #20
         reset= 1'b0;
         
-        #600
+        #1000
 
 
         //        data_in = 32'h76543210;

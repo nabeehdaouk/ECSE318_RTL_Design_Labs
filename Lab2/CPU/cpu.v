@@ -20,7 +20,6 @@ module cpu(
     reg [11:0] branch_address;
     reg branch_valid;
     reg clk_en;
-
     reg carry;
     reg [31:0] result;
     wire zro, neg, evn, par, cry;
@@ -198,14 +197,31 @@ module cpu(
                         end
                         ROT:
                         begin
+                            mem_en <= 1'b0;
                             branch_valid <= 1'b0;
+                            carry = 1'b0;
+                            branch_address <= {12{1'b0}};
+                            clk_en<=1'b1;
+                            if (opperand1[16] == 1'b1) begin // bit 16 indicates left or right rotate
+                                result <= (opperand2 << opperand1[15:12]) | (opperand2 >> (32 - opperand1[15:12])); // creates a value for the bits shifted out, then OR with oringial shift that pulled in 0
+                            end else begin
+                                result <= (opperand2 >> opperand1[15:12]) | (opperand2 << (32 - opperand1[15:12]));
+                            end
+
                         end
                         SHF:
                         begin
                             mem_en <= 1'b0;
-                            address <= {12{1'b0}};
                             branch_valid <= 1'b0;
-                            
+                            carry = 1'b0;
+                            branch_address <= {12{1'b0}};
+                            clk_en<=1'b1;
+                            if (opperand1[16] == 1'b1) begin // bit 16 indicates left or right shift
+                                result <= opperand2 << opperand1[15:12]; // bit 16 high shift left
+                            end
+                            else begin
+                                result <= opperand2 >> opperand1[15:12]; // bit 16 low shift right
+                            end
                         end
                         HLT:
                         begin
