@@ -51,7 +51,7 @@ module cpu_top_tb ();
 
         data_in = 32'haaaaaaaa;
         read_write = 1'b1;
-        address = 12'h003;
+        address = 12'h005;
         #20
 
 
