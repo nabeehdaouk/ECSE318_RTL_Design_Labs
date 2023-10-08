@@ -44,14 +44,39 @@ module cpu_top_tb ();
         #20
 
         // Block program memory
-        data_in = 32'b0001_1_0_00_000000000101_000000000011;
+        data_in = 32'b0001_1_0_00_000000000111_000000000011; //LD MEM7 REG3
         read_write = 1'b1;
         address = 12'h001;
         #20
 
-        data_in = 32'haaaaaaaa;
+        data_in = 32'b0001_1_0_00_000000001000_000000000100; //LD MEM8 REG4
+        read_write = 1'b1;
+        address = 12'h002;
+        #20
+
+//        data_in = 32'b0101_0_0_00_000000000011_000000000100; //ADD REG3 REG4, result in 4
+//        read_write = 1'b1;
+//        address = 12'h003;
+//        #20
+
+        data_in = 32'h00000000; //NOP
+        read_write = 1'b1;
+        address = 12'h004;
+        #20
+
+        data_in = 32'b1001_0_0_00_000000000011_000000000011; //CMP REG4, result in 4
         read_write = 1'b1;
         address = 12'h005;
+        #20
+
+        data_in = 32'h0000000a; //data value
+        read_write = 1'b1;
+        address = 12'h007;
+        #20
+
+        data_in = 32'h000000ff; //data value
+        read_write = 1'b1;
+        address = 12'h008;
         #20
 
 
@@ -61,7 +86,7 @@ module cpu_top_tb ();
         #20
         reset= 1'b0;
         
-        #200
+        #600
 
 
         //        data_in = 32'h76543210;
