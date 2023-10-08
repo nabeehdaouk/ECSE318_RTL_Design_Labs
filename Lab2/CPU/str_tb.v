@@ -43,39 +43,73 @@ module cpu_top_tb ();
         mem_en = 1'b1;
         #20
 
+       // cpu disable
+        cpu_en = 1'b0;
+
+        // reset 
+        reset = 1'b1;
+        clr_mem = 1'b1;
+        #20
+
+        // initialize system
+        clr_mem = 1'b0;
+        reset = 1'b0;
+        main_clk = 1'b0;
+        data_in = 32'h00000000;
+        cpu_en = 1'b0;
+        mem_en = 1'b1;
+        #20
+
         // Block program memory
-        data_in = 32'b0001_1_0_00_000000000101_000000000011; // LD MEM5 REG3
+        data_in = 32'b0001_1_0_00_000000000111_000000000011; //LD MEM7 REG3
         read_write = 1'b1;
         address = 12'h001;
         #20
 
-        data_in = 32'haaaaaaaa; // data value
+ //STR
+        data_in = 32'b0010_0_1_00_000000000011_000000001000; // STR REG5 MEM8
         read_write = 1'b1;
-        address = 12'h005;
+        address = 12'h002;
         #20
 
-
-        // run cpu
-        cpu_en=1'b1;
-        reset= 1'b1;
+        data_in = 32'b0001_1_0_00_000000001000_000000000101; //LD MEM8 REG5
+        read_write = 1'b1;
+        address = 12'h003;
         #20
-        reset= 1'b0;
-        
-        #200
 
-        // STR
-        data_in = 32'b0010_0_1_00_000000000101_000000000111; // STR MEM5 REG7
+//        data_in = 32'b0001_1_0_00_000000001000_000000000100; //LD MEM8 REG4
+//        read_write = 1'b1;
+//        address = 12'h002;
+//        #20
+
+//        // STR
+//        data_in = 32'b0010_0_1_00_000000000101_000000000111; // STR REG5 MEM7
+//        read_write = 1'b1;
+//        address = 12'h002;
+//        #20
+//
+//    
+//        data_in = 32'b0001_1_0_00_000000000111_000000000000; // LD MEM7 REG0
+//        read_write = 1'b1;
+//        address = 12'h003;
+//        #20
+
+        data_in = 32'haaaaaaaa; // data value
         read_write = 1'b1;
         address = 12'h007;
         #20
 
+        
+              
+
         // run cpu
         cpu_en=1'b1;
         reset= 1'b1;
         #20
         reset= 1'b0;
         
-        #200
+        #900
+
 
 
 
