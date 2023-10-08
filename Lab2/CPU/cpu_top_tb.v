@@ -54,17 +54,27 @@ module cpu_top_tb ();
         address = 12'h002;
         #20
 
-        data_in = 32'b0101_0_0_00_000000000011_000000000100; //ADD REG3 REG4, result in 4
+//        data_in = 32'b0101_0_0_00_000000000011_000000000100; //ADD REG3 REG4, result in 4
+//        read_write = 1'b1;
+//        address = 12'h003;
+//        #20
+
+        data_in = 32'h00000000; //NOP
         read_write = 1'b1;
-        address = 12'h003;
+        address = 12'h004;
         #20
 
-        data_in = 32'haaaaaaaa; //data value
+        data_in = 32'b1001_0_0_00_000000000011_000000000011; //CMP REG4, result in 4
+        read_write = 1'b1;
+        address = 12'h005;
+        #20
+
+        data_in = 32'h0000000a; //data value
         read_write = 1'b1;
         address = 12'h007;
         #20
 
-        data_in = 32'h0f0f0f0f; //data value
+        data_in = 32'h000000ff; //data value
         read_write = 1'b1;
         address = 12'h008;
         #20
@@ -76,7 +86,7 @@ module cpu_top_tb ();
         #20
         reset= 1'b0;
         
-        #500
+        #600
 
 
         //        data_in = 32'h76543210;
