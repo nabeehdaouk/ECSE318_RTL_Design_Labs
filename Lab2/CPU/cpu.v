@@ -122,7 +122,7 @@ module cpu(
                 else
                     begin
                         opperand1<=(IR[27])?{{20{1'b0}},IR[23:12]} : file_reg[IR[15:12]]; //source
-                        opperand2<=(IR[26])?{32{1'b0}} : file_reg[IR[15:12]]; //dest
+                        opperand2<=(IR[26])?{32{1'b0}} : file_reg[IR[3:0]]; //dest
                         clk_en<=1'b1;
                     end
             end
