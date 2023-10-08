@@ -202,7 +202,10 @@ module cpu(
                         end
                         SHF:
                         begin
+                            mem_en <= 1'b0;
+                            address <= {12{1'b0}};
                             branch_valid <= 1'b0;
+                            
                         end
                         HLT:
                         begin
