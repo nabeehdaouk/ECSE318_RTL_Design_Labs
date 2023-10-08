@@ -45,13 +45,19 @@ module test_prog_N_tb ();
         #20
 
         read_write = 1'b1;
-
+$display("------------------------------------------------------------------------------------------------------------");
+$display("PROGRAMING MODE");
+$display("PROGRAMING N=6 TEST PROGRAM...");
+$display("  INST, SRC, DEST");
+$display("  -> LD MEM0 REG3");
+$display("  -> CMP REG3 REG4");
+$display("  -> STR REG4 MEM1");
         // PROGRAM MODE: 
         data_in = 32'b0001_1_0_00_000000000000_000000000011; //LD MEM0 REG3
         address = 12'h001;
         #20
 
-        data_in = 32'b1001_0_0_00_000000000011_000000000100; //CMP REG3, result in REG4
+        data_in = 32'b1001_0_0_00_000000000011_000000000100; //CMP REG3 REG4
         address = 12'h002;
         #20
 
@@ -65,7 +71,7 @@ module test_prog_N_tb ();
         address = 12'h000;
         #20
 
-
+$display("RUNNING N=6 TEST PROGRAM...");
         // RUN PROGRAM IN CPU
         cpu_en=1'b1;
         reset= 1'b1;
@@ -92,15 +98,15 @@ module test_prog_N_tb ();
         cpu_en = 1'b0;
         mem_en = 1'b1;
         #20
-$display("------------------------------------------------------------------------------------------------------------");
+ $display("*****************************");
  $display("CHECKIG MEMORY VALUE AT LOCATION 1");
- $display("EXPECTED VALUE OF -6 (2s comp of 6");
+ $display("EXPECTED VALUE OF -6 (2s comp of 6)");
   //CHECK MEMORY VALUE AT LOCATION 1
         read_write = 1'b0;
         address = 12'h001;
         #20
-        $display("read_out_data: %h", read_out_data);
-        $display("read_out_data: %d", read_out_data);
+        $display("read_out_data in hex: %h", read_out_data);
+        $display("read_out_data in bin: %d", read_out_data);
 $display("------------------------------------------------------------------------------------------------------------");
 
 
