@@ -1,4 +1,4 @@
-module test_prog_N_tb ();
+module test_rot_sht_tb ();
     reg main_clk;
     reg reset;
     reg cpu_en;
@@ -46,28 +46,23 @@ module test_prog_N_tb ();
 
         read_write = 1'b1;
 $display("------------------------------------------------------------------------------------------------------------");
-$display("PROGRAMING MODE");
-$display("PROGRAMING N=6 TEST PROGRAM...");
-$display("  INST, SRC, DEST");
-$display("  -> LD MEM0 REG3");
-$display("  -> CMP REG3 REG4");
-$display("  -> STR REG4 MEM1");
+
         // PROGRAM MODE: 
         data_in = 32'b0001_1_0_00_000000000000_000000000011; //LD MEM0 REG3
         address = 12'h001;
         #20
 
-        data_in = 32'b1001_0_0_00_000000000011_000000000100; //CMP REG3 REG4
+        data_in = 32'b0111_1_0_00_000000010011_000000000011; //SHF REG3 by 3
         address = 12'h002;
         #20
 
         //STR
-        data_in = 32'b0010_0_1_00_000000000100_000000000001; // STR REG4 MEM1
+        data_in = 32'b0010_0_1_00_000000000011_000000000001; // STR REG4 MEM1
         address = 12'h003;
         #20
 
 
-        data_in = 32'h00000006; // data value, also NOP
+        data_in = 32'hf000000f; // data value, also NOP
         address = 12'h000;
         #20
 
@@ -105,8 +100,8 @@ $display("RUNNING N=6 TEST PROGRAM...");
         read_write = 1'b0;
         address = 12'h001;
         #20
-        $display("read_out_data in hex: %h", read_out_data);
-        $display("read_out_data in dec: %d", read_out_data);
+        $display("read_out_data in hex: %b", read_out_data);
+        $display("read_out_data in dec: %h", read_out_data);
 $display("------------------------------------------------------------------------------------------------------------");
 
 

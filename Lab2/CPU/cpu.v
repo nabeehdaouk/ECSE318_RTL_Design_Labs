@@ -199,13 +199,15 @@ module cpu(
                         begin
                             mem_en <= 1'b0;
                             branch_valid <= 1'b0;
-                            carry = 1'b0;
                             branch_address <= {12{1'b0}};
                             clk_en<=1'b1;
-                            if (opperand1[16] == 1'b1) begin // bit 16 indicates left or right rotate
-                                result <= (opperand2 << opperand1[15:12]) | (opperand2 >> (32 - opperand1[15:12])); // creates a value for the bits shifted out, then OR with oringial shift that pulled in 0
+                            if (opperand1[4] == 1'b1) begin // bit 16 indicates left or right rotate
+
+                                result <= (opperand2 << opperand1[3:0]) | (opperand2 >> (32 - opperand1[3:0])); // creates a value for the bits shifted out, then OR with oringial shift that pulled in 0
                             end else begin
-                                result <= (opperand2 >> opperand1[15:12]) | (opperand2 << (32 - opperand1[15:12]));
+                                result <= (opperand2 >> opperand1[3:0]) | (opperand2 << (32 - opperand1[3:0]));
+                                carry = 1'b0;
+
                             end
 
                         end
@@ -216,11 +218,11 @@ module cpu(
                             carry = 1'b0;
                             branch_address <= {12{1'b0}};
                             clk_en<=1'b1;
-                            if (opperand1[16] == 1'b1) begin // bit 16 indicates left or right shift
-                                result <= opperand2 << opperand1[15:12]; // bit 16 high shift left
+                            if (opperand1[4] == 1'b1) begin // bit 16 indicates left or right shift
+                                {carry, result} <= opperand2 << opperand1[3:0]; // bit 16 high shift left
                             end
                             else begin
-                                result <= opperand2 >> opperand1[15:12]; // bit 16 low shift right
+                                result <= opperand2 >> opperand1[3:0]; // bit 16 low shift right
                             end
                         end
                         HLT:
