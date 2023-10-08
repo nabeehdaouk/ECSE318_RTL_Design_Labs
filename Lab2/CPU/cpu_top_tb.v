@@ -39,45 +39,55 @@ module cpu_top_tb ();
         reset = 1'b0;
         main_clk = 1'b0;
         data_in = 32'h00000000;
-        cpu_en = 1'b1;
+        cpu_en = 1'b0;
         mem_en = 1'b1;
         #20
 
         // Block program memory
-        data_in = 32'h32103210;
+        data_in = 32'b0001_1_0_00_000000000101_000000000011;
         read_write = 1'b1;
         address = 12'h001;
         #20
 
         data_in = 32'haaaaaaaa;
         read_write = 1'b1;
-        address = 12'h002;
-        #20
-
-        data_in = 32'h76543210;
-        read_write = 1'b1;
         address = 12'h003;
         #20
 
-        // Check memory values
-        read_write = 1'b0;
-        address = 12'h001;
-        #20
-        $display("read_out_data: %h", read_out_data);
-        
 
-        read_write = 1'b0;
-        address = 12'h002;
+        // run cpu
+        cpu_en=1'b1;
+        reset= 1'b1;
         #20
-        $display("read_out_data: %h", read_out_data);
+        reset= 1'b0;
         
+        #100
 
-        read_write = 1'b0;
-        address = 12'h003;
-        #20
-        $display("read_out_data: %h", read_out_data);
-        
-    $finish;
+
+        //        data_in = 32'h76543210;
+        //        read_write = 1'b1;
+        //        address = 12'h003;
+        //        #20
+        //
+        //        // Check memory values
+        //        read_write = 1'b0;
+        //        address = 12'h001;
+        //        #20
+        //        $display("read_out_data: %h", read_out_data);
+        //        
+        //
+        //        read_write = 1'b0;
+        //        address = 12'h002;
+        //        #20
+        //        $display("read_out_data: %h", read_out_data);
+        //        
+        //
+        //        read_write = 1'b0;
+        //        address = 12'h003;
+        //        #20
+        //        $display("read_out_data: %h", read_out_data);
+
+        $stop();
 
     end
 

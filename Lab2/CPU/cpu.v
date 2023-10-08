@@ -80,7 +80,7 @@ module cpu(
     end
 
 
-    assign clk= (clk_en)? clk : 1'b0; //for HALT
+    assign clk= (clk_en)? clk_in : 1'b0; //for HALT
     assign clr_mem= 1'b0;
 
     //5 CPU STAGES

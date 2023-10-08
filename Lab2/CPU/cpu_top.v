@@ -34,8 +34,7 @@ module cpu_top (
     assign gated_clr_mem= (cpu_en)? clr_mem_cpu: clr_mem;
     assign gated_read_write= (cpu_en)? read_write_cpu: read_write;
     assign gated_mem_en= (cpu_en)? mem_en_cpu: mem_en;
-    assign gated_data_to_cpu= (cpu_en)? data_to_cpu: read_out_data;
-
+    assign read_out_data= data_to_cpu;
 
     memory memory_instance(
         .clk(main_clk),
@@ -44,7 +43,7 @@ module cpu_top (
         .read_write(gated_read_write),
         .data_in(gated_data_to_mem),
         .clr_mem(gated_clr_mem),
-        .data_out(gated_data_to_cpu)
+        .data_out(data_to_cpu)
     );
 
 
