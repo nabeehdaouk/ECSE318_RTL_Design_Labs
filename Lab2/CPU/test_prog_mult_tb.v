@@ -48,10 +48,18 @@ module test_prog_mult_tb ();
         $display("------------------------------------------------------------------------------------------------------------");
         $display("PROGRAMING MODE");
         $display("PROGRAMING MULTIPLICATION TEST PROGRAM...");
-        $display("  INST, SRC, DEST");
-        $display("  -> LD MEM0 REG3");
-        $display("  -> CMP REG3 REG4");
-        $display("  -> STR REG4 MEM1");
+        $display("ADRS  -> INST SRC DEST");
+        $display("hX004 -> LD MEM0 REG0");
+        $display("hX005 -> LD MEM1 REG1");
+        $display("hX006 -> LD MEM2 REG2");
+        $display("hX007 -> LD MEMf REGf");
+        $display("hX008 -> ADD REG0 REG2");
+        $display("hX009 -> ADD REGf REG1");
+        $display("hX00a -> BRA ZERO ADRS00c");
+        $display("hX00b -> BRA POS ADRS008");
+        $display("hX00c -> STR REG2 MEM2");
+        $display("hX00d -> HLT");
+        
         // PROGRAM MODE: 
         data_in = 32'h0000000e; // data value for A
         address = 12'h000;
@@ -140,13 +148,14 @@ module test_prog_mult_tb ();
         #20
         $display("*****************************");
         $display("CHECKING MEMORY VALUE AT LOCATION F3");
-        $display("EXPECTED VALUE OF Hex: a, Dec: 10");
-        //CHECK MEMORY VALUE AT LOCATION 1
+        $display("MULTIPLIED 14 * 15, EXP RES: 210");
+        //CHECK MEMORY VALUE AT LOCATION 2
         read_write = 1'b0;
         address = 12'h002;
         #20
-        $display("read_out_data in hex: %h", read_out_data);
-        $display("read_out_data in dec: %d", read_out_data);
+        $display("read_out_data in bin: %b", read_out_data);
+        $display("read_out_data in hex:             %h", read_out_data);
+        $display("read_out_data in dec:        %d", read_out_data);
         $display("------------------------------------------------------------------------------------------------------------");
 
 
@@ -157,9 +166,5 @@ module test_prog_mult_tb ();
         $stop();
 
     end
-
-
-
-
 
 endmodule
