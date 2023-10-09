@@ -8,6 +8,8 @@ module test_prog_ones_tb ();
     reg [11:0] address;
     reg [31:0] data_in;
     wire signed [31:0] read_out_data;
+    
+    localparam test_number= 32'haaaa1111;
 
     cpu_top cpu_top_instance(
         .reset(reset),
@@ -48,18 +50,35 @@ module test_prog_ones_tb ();
         $display("------------------------------------------------------------------------------------------------------------");
         $display("PROGRAMING MODE");
         $display("PROGRAMING NUMBER OF ONES TEST PROGRAM...");
-        $display("  INST, SRC, DEST");
-        $display("  -> LD MEM0 REG3");
-        $display("  -> CMP REG3 REG4");
-        $display("  -> STR REG4 MEM1");
+        $display();
+        $display("VALUES IN MEM:");
+        $display("hX000  -> test_number");
+        $display("hX001  -> 0");
+        $display();
+        $display("PROGRAM:");
+        $display("ADRS ->  INST, SRC, DEST");
+        $display("hX004  -> LD MEM0 REG0");
+        $display("hX005  -> LD MEM1 REG2");
+        $display("hX006  -> SHF Left1 REG0");
+        $display("hX007  -> BRANCH NO CARRY ADRS_11");
+        $display("hX008  -> ADD IMED_1 REG2");
+        $display("hX009  -> ADD IMED_0 REG0");
+        $display("hX00a  -> BRANCH ZERO ADRS_12");
+        $display("hX00b  -> BRANCH ALWAYS ADRS_6");
+        $display("hX00c  -> STR REG2 MEM1");
+        $display("hX00d  -> HLT");
+        
+        
+        
         // PROGRAM MODE: 
-    read_write = 1'b1;
+        
+        read_write = 1'b1;
     
-        data_in = 32'hffff99f1; //SNumberStored to count 
+        data_in = test_number; //SNumberStored to count 
         address = 12'h000;
         #20
 
-         data_in = 0; //SNumberStored to count 
+        data_in = 0; //SNumberStored to count 
         address = 12'h001;
         #20
 
@@ -67,11 +86,11 @@ module test_prog_ones_tb ();
         address = 12'h004;
         #20
 
-        data_in = 32'b0001_1_0_00_000000000001_000000000010; //LD MEM2 REG2
+        data_in = 32'b0001_1_0_00_000000000001_000000000010; //LD MEM1 REG2
         address = 12'h005;
         #20
 
-        data_in = 32'b0111_1_0_00_000000010001_000000000000; //SHF REG0 left 1
+        data_in = 32'b0111_1_0_00_000000010001_000000000000; //SHF Left1 REG0
         address = 12'h006;
         #20
 
@@ -133,13 +152,15 @@ module test_prog_ones_tb ();
         cpu_en = 1'b0;
         mem_en = 1'b1;
         #20
-        $display("*****************************");
-        $display("CHECKING MEMORY VALUE AT LOCATION 1");
-        $display("EXPECTED VALUE OF 3");
+        $display("**********************************************************");
+        $display("CHECKING MEMORY VALUE AT LOCATION 1, WHERE RESUlt IS STORED");
+        $display("NUMBER OF 1's IN %b", test_number);
+        $display("**********************************************************");
         //CHECK MEMORY VALUE AT LOCATION 1
         read_write = 1'b0;
         address = 12'h001;
         #20
+        $display("read_out_data in bin: %b", read_out_data);
         $display("read_out_data in hex: %h", read_out_data);
         $display("read_out_data in dec: %d", read_out_data);
         $display("------------------------------------------------------------------------------------------------------------");

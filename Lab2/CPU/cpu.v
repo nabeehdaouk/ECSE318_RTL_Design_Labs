@@ -12,7 +12,7 @@ module cpu(
 
     reg [31:0] file_reg [15:0];
     reg [31:0] IR;
-    reg [11:0] PC;
+    reg [11:0] PC; //reset starts PC at 3, therefore 0:2 in mem can be used for values
     reg [2:0] IC; //instruction counter, counts to 5 for Fetch, Decode, Execute, Memory, WriteBack
 
     reg [31:0] opperand1;
