@@ -153,7 +153,7 @@ module test_prog_ones_tb ();
         mem_en = 1'b1;
         #20
         $display("**********************************************************");
-        $display("CHECKING MEMORY VALUE AT LOCATION 1, WHERE RESUlt IS STORED");
+        $display("CHECKING MEMORY VALUE AT LOCATION 1, WHERE RESULT IS STORED");
         $display("NUMBER OF 1's IN %b", test_number);
         $display("**********************************************************");
         //CHECK MEMORY VALUE AT LOCATION 1
