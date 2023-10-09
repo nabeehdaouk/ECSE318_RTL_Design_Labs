@@ -98,7 +98,7 @@ module cpu(
                         branch_address <= {12{1'b0}};
                         branch_valid <= 1'b0;
                         clk_en<=1'b1;
-                        PC<=0;
+                        PC<=3; //start programs in location 3
                         opperand1<= 0;
                         opperand2<= 0;
                         IR<= 0;
@@ -137,7 +137,7 @@ module cpu(
                     branch_address <= {12{1'b0}};
                     branch_valid <= 1'b0;
                     clk_en<=1'b1;
-                    PC<=0;
+                    PC<=3; //start programs in location 3
                     opperand1<= 0;
                     opperand2<= 0;
                     IR<= 0;
@@ -148,8 +148,8 @@ module cpu(
                         begin
                             mem_en<= 1'b0;
                             address <= {12{1'b0}};
-                            result <= {32{1'b0}};
-                            carry <= 1'b0;
+                            result <= result;
+                            carry <= carry;
                             branch_address <= {12{1'b0}};
                             branch_valid <= 1'b0;
                             clk_en<=1'b1;
@@ -160,7 +160,7 @@ module cpu(
                             mem_en<= 1'b1;
                             read_write<= read_from_mem;
                             address <= IR[23:12]; //mem_source
-                            result <= {32{1'b0}};
+                            result <= result;
                             carry <= 1'b0;
                             branch_address <= 0;
                             branch_valid <= 0;
@@ -246,13 +246,13 @@ module cpu(
                         end
                         BRA:
                         begin
-                            result <= {32{1'b0}};
-                            carry <= 1'b0;
+                            result <= result;
+                            carry <= carry;
                             case(IR[27:24])
                                 Always: begin //always
                                     mem_en<= 1'b1;
                                     read_write<= read_from_mem;
-                                    address <= IR[23:12]; //branch address
+                                    branch_address <= IR[23:12]; //branch address
                                     branch_valid <= 1'b1;
                                 end
                                 Parity: begin //parity odd
@@ -260,7 +260,7 @@ module cpu(
                                         begin
                                             mem_en<= 1'b1;
                                             read_write<= read_from_mem;
-                                            address <= IR[23:12]; //branch address
+                                            branch_address <= IR[23:12]; //branch address
                                             branch_valid <= 1'b1;
                                         end else begin branch_valid <= 1'b0; end
                                 end
@@ -269,7 +269,7 @@ module cpu(
                                         begin
                                             mem_en<= 1'b1;
                                             read_write<= read_from_mem;
-                                            address <= IR[23:12]; //branch address
+                                            branch_address <= IR[23:12]; //branch address
                                             branch_valid <= 1'b1;
                                         end else begin branch_valid <= 1'b0; end
                                 end
@@ -278,7 +278,7 @@ module cpu(
                                         begin
                                             mem_en<= 1'b1;
                                             read_write<= read_from_mem;
-                                            address <= IR[23:12]; //branch address
+                                            branch_address <= IR[23:12]; //branch address
                                             branch_valid <= 1'b1;
                                         end else begin branch_valid <= 1'b0; end
                                 end
@@ -287,7 +287,7 @@ module cpu(
                                         begin
                                             mem_en<= 1'b1;
                                             read_write<= read_from_mem;
-                                            address <= IR[23:12]; //branch address
+                                            branch_address <= IR[23:12]; //branch address
                                             branch_valid <= 1'b1;
                                         end else begin branch_valid <= 1'b0; end
                                 end
@@ -296,7 +296,7 @@ module cpu(
                                         begin
                                             mem_en<= 1'b1;
                                             read_write<= read_from_mem;
-                                            address <= IR[23:12]; //branch address
+                                            branch_address <= IR[23:12]; //branch address
                                             branch_valid <= 1'b1;
                                         end else begin branch_valid <= 1'b0; end
                                 end
@@ -305,7 +305,7 @@ module cpu(
                                         begin
                                             mem_en<= 1'b1;
                                             read_write<= read_from_mem;
-                                            address <= IR[23:12]; //branch address
+                                            branch_address <= IR[23:12]; //branch address
                                             branch_valid <= 1'b1;
                                         end else begin branch_valid <= 1'b0; end
                                 end
@@ -314,14 +314,14 @@ module cpu(
                                         begin
                                             mem_en<= 1'b1;
                                             read_write<= read_from_mem;
-                                            address <= IR[23:12]; //branch address
+                                            branch_address <= IR[23:12]; //branch address
                                             branch_valid <= 1'b1;
                                         end else begin branch_valid <= 1'b0; end
                                 end
                                 default: begin //default case is no branch, including when bit [27] is set
                                     mem_en<= 1'b1;
                                     read_write<= read_from_mem;
-                                    address <= IR[23:12]; //branch address
+                                    branch_address <= IR[23:12]; //branch address
                                     branch_valid <= 1'b0;
                                 end
                             endcase
@@ -352,7 +352,7 @@ module cpu(
                         branch_address <= {12{1'b0}};
                         branch_valid <= 1'b0;
                         clk_en<=1'b1;
-                        PC<=0;
+                        PC<=3; //start programs in location 3
                         opperand1<= 0;
                         opperand2<= 0;
                         IR<= 0;
@@ -360,7 +360,7 @@ module cpu(
 
                 else
                     begin
-                        PC = (branch_valid)? IR[11:0] : PC+1'b1;
+                        PC = (branch_valid)? branch_address : PC+1'b1;
                         address= PC;
                         mem_en<= 1'b1;
                         read_write<= read_from_mem;
@@ -380,7 +380,7 @@ module cpu(
                         branch_address <= {12{1'b0}};
                         branch_valid <= 1'b0;
                         clk_en<=1'b1;
-                        PC<=0;
+                        PC<=3; //start programs in location 3
                         opperand1<= 0;
                         opperand2<= 0;
                         IR<= 0;
