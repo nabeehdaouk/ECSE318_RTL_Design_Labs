@@ -22,7 +22,7 @@ generate
     end
 endgenerate
 
-// Calculate the carry-in signals
+// Ccarry-in signals
 assign C[0] = cin; // Initial carry-in is 0
 generate
     for (i = 0; i < 16; i = i + 1) begin
@@ -30,7 +30,7 @@ generate
     end
 endgenerate
 
-// Calculate the sum output
+// sum output
 assign SUM[0] = A[0] ^ B[0] ^ C[0];
 generate
     for (i = 0; i < 15; i = i + 1) begin
@@ -38,7 +38,7 @@ generate
     end
 endgenerate
 
-// Carry-out is the final carry bit
+// the final carry bit
 assign C_OUT = C[16];
 
 
