@@ -54,16 +54,16 @@ $display("  -> CMP REG3 REG4");
 $display("  -> STR REG4 MEM1");
         // PROGRAM MODE: 
         data_in = 32'b0001_1_0_00_000000000000_000000000011; //LD MEM0 REG3
-        address = 12'h001;
+        address = 12'h004;
         #20
 
         data_in = 32'b1001_0_0_00_000000000011_000000000100; //CMP REG3 REG4
-        address = 12'h002;
+        address = 12'h005;
         #20
 
         //STR
         data_in = 32'b0010_0_1_00_000000000100_000000000001; // STR REG4 MEM1
-        address = 12'h003;
+        address = 12'h006;
         #20
 
 

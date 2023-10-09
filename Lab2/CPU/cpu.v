@@ -1,28 +1,28 @@
 module cpu(
     input clk_in,
-    input reset,
+    input reset, //resets module and PC set to 3, 2:0 used for values
     input [31:0] data_in, //from mem
     output reg [31:0] data_out, //to mem
     output reg [11:0] address, //to mem
     output reg read_write, //to mem
     output reg mem_en, //to mem
-    output clr_mem
+    output clr_mem //wipes mem, not used for now
 
 );
 
     reg [31:0] file_reg [15:0];
-    reg [31:0] IR;
+    reg [31:0] IR; //Holds curret instruction
     reg [11:0] PC; //reset starts PC at 3, therefore 0:2 in mem can be used for values
-    reg [2:0] IC; //instruction counter, counts to 5 for Fetch, Decode, Execute, Memory, WriteBack
+    reg [2:0] IC; //instruction counter, counts to 5 for each Instruction for: Fetch, Decode, Execute, Memory, WriteBack
 
-    reg [31:0] opperand1;
+    reg [31:0] opperand1; 
     reg [31:0] opperand2;
     reg [11:0] branch_address;
-    reg branch_valid;
+    reg branch_valid; //when to branch
     reg clk_en;
-    reg carry;
-    reg [31:0] result;
-    wire zro, neg, evn, par, cry;
+    reg carry; //output of execute
+    reg [31:0] result; //output of evecute
+    wire zro, neg, evn, par, cry; //psr connections
 
     wire clk;
 
@@ -85,7 +85,7 @@ module cpu(
     //5 CPU STAGES
     always @(posedge clk, reset) //CPU_STAGES
 
-    begin
+    begin: Main_CPU_Block
         case (IC) // @suppress "Default clause missing from case statement"
             FETCH:
             begin
@@ -393,7 +393,7 @@ module cpu(
                 begin
                     file_reg[IR[3:0]]<= result;
                 end
-                //inc PC and connect to mem for read in next fetch
+                
 
             end
         endcase
