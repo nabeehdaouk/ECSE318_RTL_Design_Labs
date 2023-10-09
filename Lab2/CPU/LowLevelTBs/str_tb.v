@@ -1,4 +1,4 @@
-module cpu_top_tb ();
+module str_tb ();
     reg main_clk;
     reg reset;
     reg cpu_en;
