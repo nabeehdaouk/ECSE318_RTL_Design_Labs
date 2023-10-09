@@ -54,6 +54,7 @@ module test_prog_mult_tb ();
         $display("  -> STR REG4 MEM1");
         // PROGRAM MODE: 
         data_in = 32'b0001_1_0_00_000000001010_000000000000; //LD MEMa REG0
+        read_write = 1'b1;
         address = 12'h000;
         #20
         
@@ -73,11 +74,11 @@ module test_prog_mult_tb ();
         address = 12'h004;
         #20
 
-        data_in = 32'b0011_0_1_01_000000000101_000000001001; //BRANCH if ZERO to adrs 8
+        data_in = 32'b0011_0_1_01_000000001001_000000001001; //BRANCH if ZERO to adrs 8
         address = 12'h005;
         #20
 
-        data_in = 32'b0011_0_1_11_000000000110_000000000011; //BRANCH if POS to adrs 3
+        data_in = 32'b0011_0_1_11_000000000011_000000000011; //BRANCH if POS to adrs 3
         address = 12'h006;
         #20
 
@@ -86,7 +87,9 @@ module test_prog_mult_tb ();
         #20
 
         data_in = 32'b1001_0_0_00_000000000000_000000000000; //HLT program
+        address = 12'h009;
         #20
+        
         data_in = 32'h00000005; // data value for A, also NOP
         address = 12'h00a;
         #20
