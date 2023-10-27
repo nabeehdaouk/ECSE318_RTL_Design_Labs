@@ -180,6 +180,6 @@ module testFreeCell;
     always
     #5 clock = ~clock;
 
-    freecellPlayer fc(clock,source,dest,win);
+    freecellPlayer FreeCell(clock,source,dest,win);
 
 endmodule // testFreeCell
