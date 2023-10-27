@@ -1,7 +1,7 @@
 module FreeCell(
     input clk,
     input [3:0] source, dest,
-    output reg win
+    output reg win, illegal
 );
     localparam s=2'b00; //spade
     localparam c=2'b01; //club
@@ -30,51 +30,68 @@ module FreeCell(
 
     always @(posedge clk) begin
         case({source, dest})
-        {4'b0???, 4'b0???}: //col to col
-        begin
-            if ((tableau[dest[2:0]][0]== (tableau[source[2:0]][0]) +1'b1) & )
+            ({4'b0???, 4'b0???}): //col to col
             begin
-            tableau[dest[2:0]][0]<= tableau[source[2:0]][0];
-            tableau[dest[2:0]][21:1] <= tableau[dest[2:0]][20:0];
-            tableau[source[2:0]][20:0] <= tableau[source[2:0]][21:1];
-            end else begin
-        end
-        end
-        
+                if ((tableau[dest[2:0]][0][3:0]==((tableau[source[2:0]][0][3:0]) +1'b1)) && (tableau[dest[2:0]][0][5] != tableau[source[2:0]][0][5]))
+                    begin
+                        tableau[dest[2:0]][0]<= tableau[source[2:0]][0];
+                        tableau[dest[2:0]][21:1] <= tableau[dest[2:0]][20:0];
+                        tableau[source[2:0]][20:0] <= tableau[source[2:0]][21:1];
+                        illegal<= 1'b0;
+                    end else begin
+                    illegal<= 1'b1;
+                end
+            end
 
-        {4'b0???, 4'b10??}: //col to free_cell
-begin
-            free_cells[dest[1:0]]<= tableau[source[2:0]][0];
-            tableau[source[2:0]][20:0] <= tableau[source[2:0]][21:1];
-        end
-        
-        {4'b0???, 4'b11??}: //col to home_cell
-        begin
-            //home_cells
-            tableau[source[2:0]][20:0] <= tableau[source[2:0]][21:1];
-        end
-        
-        {4'b10??, 4'b0???}: //free_cell to col
-        begin
-           tableau[dest[2:0]][0] <= free_cells[source[1:0]]; 
-           tableau[dest[2:0]][21:1] <= tableau[dest[2:0]][20:0];
-           free_cells[source[1:0]]<= 5'b00000;
-        end
 
-        {4'b10??, 4'b10??}: //free_cell to free_cell
-        begin
-           free_cells[dest[1:0]] <= free_cells[source[1:0]]; 
-           free_cells[source[1:0]]<= 5'b00000;
-        end
-        
-        {4'b10??, 4'b11??}: //free_cell to home_cell
-        begin
-            free_cells[source[1:0]]<= 5'b00000;
-        end
-        
-        default: //illigal
-        begin
-        end
+            ({4'b0???, 4'b10??}): //col to free_cell
+            begin
+                if (free_cells[dest[1:0]] == 6'b000000)
+                    begin
+                        free_cells[dest[1:0]]<= tableau[source[2:0]][0];
+                        tableau[source[2:0]][20:0] <= tableau[source[2:0]][21:1];
+                        illegal<= 1'b0;
+                    end
+                else
+                    begin
+                        illegal<= 1'b1;
+                    end
+            end
+
+            ({4'b0???, 4'b11??}): //col to home_cell
+            begin
+                //home_cells
+                tableau[source[2:0]][20:0] <= tableau[source[2:0]][21:1];
+            end
+
+            ({4'b10??, 4'b0???}): //free_cell to col
+            begin
+                if ((free_cells[dest[1:0]] != 6'b000000) && ((tableau[dest[2:0]][0][3:0]==((free_cells[source[1:0]][3:0]) +1'b1)) && (tableau[dest[2:0]][0][5] != free_cells[source[1:0]][5])))
+                    begin
+                        tableau[dest[2:0]][0] <= free_cells[source[1:0]];
+                        tableau[dest[2:0]][21:1] <= tableau[dest[2:0]][20:0];
+                        free_cells[source[1:0]]<= 6'b000000;
+                        illegal<= 1'b0;
+                    end
+                else
+                    begin
+                        illegal<= 1'b1;
+                    end end
+
+            ({4'b10??, 4'b10??}): //free_cell to free_cell
+            begin
+                free_cells[dest[1:0]] <= free_cells[source[1:0]];
+                free_cells[source[1:0]]<= 6'b000000;
+            end
+
+            ({4'b10??, 4'b11??}): //free_cell to home_cell
+            begin
+                free_cells[source[1:0]]<= 6'b000000;
+            end
+
+            default: //illigal
+            begin
+            end
 
         endcase
 
@@ -98,8 +115,8 @@ begin
 
 
         if (source[3] == 0) begin
-        tableau[]
-        source_column <= source[2:0];
+            tableau[]
+            source_column <= source[2:0];
         end else if (source[3:2] == 2'b10) begin
         // Handle free cell source
         // You need to add logic for this
@@ -143,6 +160,7 @@ begin
     end
 
     initial begin
+    win= 1'b0;
     // Col 1
     tableau[0][0] = {s, four};
     tableau[0][1] = {d, jack};
