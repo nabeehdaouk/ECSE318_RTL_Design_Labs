@@ -23,10 +23,9 @@ module FreeCell(
     localparam king  = 4'b1101;
 
     reg [5:0] tableau[7:0][21:0];
-    reg [3:0] home_cells[3:0]; // Array to store home cells used as COUNTRER
+    reg [3:0] home_cells[3:0]; // Array to store home cells used as COUNTRER S,C,H,D
     reg [5:0] free_cells[3:0]; // Array to store free cell card
-    reg [3:0] source_column; // Extracted source column
-    reg [3:0] dest_column; // Extracted destination column
+
 
     always @(posedge clk) begin
         case({source, dest})
@@ -60,13 +59,64 @@ module FreeCell(
 
             ({4'b0???, 4'b11??}): //col to home_cell
             begin
-                //home_cells
-                tableau[source[2:0]][20:0] <= tableau[source[2:0]][21:1];
+                case ((tableau[source[2:0]][0][5:4]))
+                    s:
+                    begin
+                        if (home_cells[s]==((tableau[source[2:0]][0][3:0]) - 1'b1))
+                            begin
+                                home_cells[s]<= home_cells[s]+1'b1;
+                                tableau[source[2:0]][20:0] <= tableau[source[2:0]][21:1];
+                                illegal<= 1'b0;
+                            end
+                        else
+                            begin illegal<= 1'b1;
+                            end
+                    end
+
+                    c:
+                    begin
+                        if (home_cells[c]==((tableau[source[2:0]][0][3:0]) - 1'b1))
+                            begin
+                                home_cells[c]<= home_cells[c]+1'b1;
+                                tableau[source[2:0]][20:0] <= tableau[source[2:0]][21:1];
+                                illegal<= 1'b0;
+                            end
+                        else
+                            begin illegal<= 1'b1;
+                            end
+                    end
+
+                    h:
+                    begin
+                        if (home_cells[h]==((tableau[source[2:0]][0][3:0]) - 1'b1))
+                            begin
+                                home_cells[h]<= home_cells[h]+1'b1;
+                                tableau[source[2:0]][20:0] <= tableau[source[2:0]][21:1];
+                                illegal<= 1'b0;
+                            end
+                        else
+                            begin illegal<= 1'b1;
+                            end
+                    end
+
+                    d:
+                    begin
+                        if (home_cells[d]==((tableau[source[2:0]][0][3:0]) - 1'b1))
+                            begin
+                                home_cells[d]<= home_cells[d]+1'b1;
+                                tableau[source[2:0]][20:0] <= tableau[source[2:0]][21:1];
+                                illegal<= 1'b0;
+                            end
+                        else
+                            begin illegal<= 1'b1;
+                            end
+                    end
+                endcase
             end
 
             ({4'b10??, 4'b0???}): //free_cell to col
             begin
-                if ((free_cells[dest[1:0]] != 6'b000000) && ((tableau[dest[2:0]][0][3:0]==((free_cells[source[1:0]][3:0]) +1'b1)) && (tableau[dest[2:0]][0][5] != free_cells[source[1:0]][5])))
+                if ((free_cells[source[1:0]] != 6'b000000) && ((tableau[dest[2:0]][0][3:0]==((free_cells[source[1:0]][3:0]) +1'b1)) && (tableau[dest[2:0]][0][5] != free_cells[source[1:0]][5])))
                     begin
                         tableau[dest[2:0]][0] <= free_cells[source[1:0]];
                         tableau[dest[2:0]][21:1] <= tableau[dest[2:0]][20:0];
@@ -80,86 +130,113 @@ module FreeCell(
 
             ({4'b10??, 4'b10??}): //free_cell to free_cell
             begin
-                free_cells[dest[1:0]] <= free_cells[source[1:0]];
-                free_cells[source[1:0]]<= 6'b000000;
+                if ((free_cells[source[1:0]] != 6'b000000) && (free_cells[dest[1:0]] == 6'b000000))
+                    begin
+                        free_cells[dest[1:0]] <= free_cells[source[1:0]];
+                        free_cells[source[1:0]]<= 6'b000000;
+                        illegal<= 1'b0;
+                    end
+                else begin
+                    illegal<= 1'b1;
+
+                end
             end
 
             ({4'b10??, 4'b11??}): //free_cell to home_cell
             begin
-                free_cells[source[1:0]]<= 6'b000000;
+                case (free_cells[source[1:0]][5:4])
+                    s:
+                    begin
+                        if (home_cells[s]==((free_cells[source[1:0]][3:0]) - 1'b1))
+                            begin
+                                home_cells[s]<= home_cells[s]+1'b1;
+                                free_cells[source[1:0]]<= 6'b000000;
+                                illegal<= 1'b0;
+                            end
+                        else
+                            begin illegal<= 1'b1;
+                            end
+                    end
+
+                    c:
+                    begin
+                        if (home_cells[c]==((free_cells[source[1:0]][3:0]) - 1'b1))
+                            begin
+                                home_cells[c]<= home_cells[c]+1'b1;
+                                free_cells[source[1:0]]<= 6'b000000;
+                                illegal<= 1'b0;
+                            end
+                        else
+                            begin illegal<= 1'b1;
+                            end
+                    end
+
+                    h:
+                    begin
+                        if (home_cells[h]==((free_cells[source[1:0]][3:0]) - 1'b1))
+                            begin
+                                home_cells[h]<= home_cells[h]+1'b1;
+                                free_cells[source[1:0]]<= 6'b000000;
+                                illegal<= 1'b0;
+                            end
+                        else
+                            begin illegal<= 1'b1;
+                            end
+                    end
+
+                    d:
+                    begin
+                        if (home_cells[d]==((free_cells[source[1:0]][3:0]) - 1'b1))
+                            begin
+                                home_cells[d]<= home_cells[d]+1'b1;
+                                free_cells[source[1:0]]<= 6'b000000;
+                                illegal<= 1'b0;
+                            end
+                        else
+                            begin illegal<= 1'b1;
+                            end
+                    end
+                endcase
             end
 
             default: //illigal
             begin
+                illegal<= 1'b1;
             end
 
         endcase
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        if (source[3] == 0) begin
-            tableau[]
-            source_column <= source[2:0];
-        end else if (source[3:2] == 2'b10) begin
-        // Handle free cell source
-        // You need to add logic for this
-        // For simplicity, you can assign source_column to a constant value
-        source_column <= 3'b000;
-        end else begin
-        // Illegal source
-        // Mark the move as illegal
-        source_column <= 3'b111; // Mark it as an invalid column
         end
 
-        if (dest[3] == 0) begin
-        dest_column <= dest[2:0];
-        end else if (dest[3:2] == 2'b10) begin
-        // Handle free cell destination
-        // You need to add logic for this
-        // For simplicity, you can assign dest_column to a constant value
-        dest_column <= 3'b000;
-        end else begin
-        // Home cell destination
-        // Determine the correct home cell based on the source
-        case (source[3:2])
-        2'b00: dest_column <= home_cells[0];
-        2'b01: dest_column <= home_cells[1];
-        2'b10: dest_column <= home_cells[2];
-        2'b11: dest_column <= home_cells[3];
-        default: dest_column = 3'b111; // Mark it as an invalid column
-        endcase
-        end
 
-        // Move processing logic
-        if (source_column != 3'b111 && dest_column != 3'b111) begin
-        // Check if the move is legal and process it
-        // You need to add logic for this based on the rules of FreeCell
-        // For simplicity, you can update tableau and home_cells based on source and destination
-        // and check if the move is a winning move
-        end
 
-        // Check if the game is won (you need to add this logic)
-        win = 0; // Set to 1 when the game is won
-    end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     initial begin
+    free_cells[0] = 6'b0;
+    free_cells[1] = 6'b0;
+    free_cells[2] = 6'b0;
+    free_cells[3] = 6'b0;
+
+    home_cells[0] = 4'b0;
+    home_cells[1] = 4'b0;
+    home_cells[2] = 4'b0;
+    home_cells[3] = 4'b0;
+
     win= 1'b0;
     // Col 1
     tableau[0][0] = {s, four};
