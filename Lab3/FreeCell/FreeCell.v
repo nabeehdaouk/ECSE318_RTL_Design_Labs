@@ -228,6 +228,16 @@ module FreeCell(
         endcase
     end
 
+    always @(*)
+    begin
+        if ((home_cells[s] & home_cells[c] & home_cells[h] & home_cells[d]) == 4'b1101)
+            begin
+                win<= 1'b1;
+            end
+        else begin
+            win<= 1'b0;
+        end
+    end
 
     initial begin
         free_cells[0] = 6'b0;
