@@ -1,14 +1,14 @@
-module freecellPlayer (clock,source,dest,win, illegal);
-input   [3:0] source, dest;
-input   clock;
-output  win;
-output illegal;
-
-
-always  @(posedge clock or source or dest)
-    $display($time,"  source:%d             dest:%d             illigal:%b          win:%b", source,dest, illegal, win);
-
-endmodule
+//module freecellPlayer (clock,source,dest,win, illegal);
+//input   [3:0] source, dest;
+//input   clock;
+//output  win;
+//output illegal;
+//
+//
+//always  @(posedge clock or source or dest)
+//    $display($time,"  source:%d             dest:%d             illigal:%b          win:%b", source,dest, illegal, win);
+//
+//endmodule
 
 module testFreeCell;
     reg [3:0] source;
