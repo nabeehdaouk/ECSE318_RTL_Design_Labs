@@ -33,7 +33,7 @@ module FreeCell(
         casez({source, dest})
             ({4'b0???, 4'b0???}): //col to col
             begin
-                if ((tableau[dest[2:0]][0][3:0]==((tableau[source[2:0]][0][3:0]) +1'b1)) && (tableau[dest[2:0]][0][5] != tableau[source[2:0]][0][5]))
+                if (((tableau[dest[2:0]][0][3:0]==((tableau[source[2:0]][0][3:0]) +1'b1)) && (tableau[dest[2:0]][0][5] != tableau[source[2:0]][0][5])) || ((tableau[dest[2:0]][0] == 6'b000000)))
                     begin
                         tableau[dest[2:0]][0]<= tableau[source[2:0]][0];
 
@@ -135,7 +135,7 @@ module FreeCell(
 
             ({4'b10??, 4'b0???}): //free_cell to col
             begin
-                if ((free_cells[source[1:0]] != 6'b000000) && ((tableau[dest[2:0]][0][3:0]==((free_cells[source[1:0]][3:0]) +1'b1)) && (tableau[dest[2:0]][0][5] != free_cells[source[1:0]][5])))
+                if ((free_cells[source[1:0]] != 6'b000000) && ((tableau[dest[2:0]][0]==6'b000000)||(tableau[dest[2:0]][0][3:0]==((free_cells[source[1:0]][3:0]) +1'b1)) && (tableau[dest[2:0]][0][5] != free_cells[source[1:0]][5])))
                     begin
                         tableau[dest[2:0]][0] <= free_cells[source[1:0]];
                         for (i = 21; i > 0; i = i - 1) begin
@@ -238,8 +238,16 @@ module FreeCell(
             win<= 1'b0;
         end
     end
+    
+integer k, j;
 
     initial begin
+        
+    for (k = 0; k < 8; k = k + 1) begin
+        for (j = 0; j < 22; j = j + 1) begin
+            tableau[k][j] = 6'b0;
+        end
+    end
         free_cells[0] = 6'b0;
         free_cells[1] = 6'b0;
         free_cells[2] = 6'b0;

@@ -55,6 +55,7 @@ module testFreeCell;
     // legal ones.
     initial begin
     clock = 0;
+    #5
     doMove("1h");   // 1
     doMove("1h");   // 2
     doMove("2h");   // 3
@@ -190,7 +191,7 @@ module testFreeCell;
         .win(win),
         .illegal(illegal)
     );
-    always  @(posedge clock or source or dest)
+    always  @(negedge clock, illegal)
     $display($time,"  source:%d             dest:%d             illigal:%b          win:%b", source,dest, illegal, win);
     
 
