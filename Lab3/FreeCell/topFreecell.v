@@ -4,8 +4,9 @@ input   clock;
 output  win;
 output illegal;
 
+
 always  @(posedge clock or source or dest)
-    $display($time,"  %d %d", source,dest);
+    $display($time,"  source:%d             dest:%d             illigal:%b          win:%b", source,dest, illegal, win);
 
 endmodule
 
@@ -182,12 +183,15 @@ module testFreeCell;
     always
     #5 clock = ~clock;
 
-    freecellPlayer FreeCell(
-        .clock(clock),
+    FreeCell FreeCellInst(
+        .clk(clock),
         .source(source),
         .dest(dest),
         .win(win),
         .illegal(illegal)
     );
+    always  @(posedge clock or source or dest)
+    $display($time,"  source:%d             dest:%d             illigal:%b          win:%b", source,dest, illegal, win);
+    
 
 endmodule // testFreeCell
