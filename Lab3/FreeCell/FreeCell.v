@@ -34,7 +34,7 @@ module FreeCell(
             ({4'b0???, 4'b0???}): //col to col
             begin
                 if (((tableau[dest[2:0]][0][3:0]==((tableau[source[2:0]][0][3:0]) +1'b1)) && (tableau[dest[2:0]][0][5] != tableau[source[2:0]][0][5])) || ((tableau[dest[2:0]][0] == 6'b000000)))
-                    begin
+                    begin//IF card denominations are 1 apart AND NOT the same color, OR dest is empty
                         tableau[dest[2:0]][0]<= tableau[source[2:0]][0];
 
                         for (i = 21; i > 0; i = i - 1) begin
@@ -55,7 +55,7 @@ module FreeCell(
             ({4'b0???, 4'b10??}): //col to free_cell
             begin
                 if (free_cells[dest[1:0]] == 6'b000000)
-                    begin
+                    begin//IF dest is OPEN/free
                         free_cells[dest[1:0]]<= tableau[source[2:0]][0];
                         for (i = 0; i < 21; i = i + 1) begin
                             tableau[source[2:0]][i] <= tableau[source[2:0]][i+1];
@@ -70,7 +70,7 @@ module FreeCell(
 
             ({4'b0???, 4'b11??}): //col to home_cell
             begin
-                case ((tableau[source[2:0]][0][5:4]))
+                case ((tableau[source[2:0]][0][5:4]))////sort each card into its own home cell stack IF denomination is 1 above, free cell used as counter
                     s:
                     begin
                         if (home_cells[s]==((tableau[source[2:0]][0][3:0]) - 1'b1))
@@ -136,7 +136,7 @@ module FreeCell(
             ({4'b10??, 4'b0???}): //free_cell to col
             begin
                 if ((free_cells[source[1:0]] != 6'b000000) && ((tableau[dest[2:0]][0]==6'b000000)||(tableau[dest[2:0]][0][3:0]==((free_cells[source[1:0]][3:0]) +1'b1)) && (tableau[dest[2:0]][0][5] != free_cells[source[1:0]][5])))
-                    begin
+                    begin//IF source free cell is NOT empty AND EITHER card is compatible with dest (color and number) OR dest is empty
                         tableau[dest[2:0]][0] <= free_cells[source[1:0]];
                         for (i = 21; i > 0; i = i - 1) begin
                             tableau[dest[2:0]][i] <= tableau[dest[2:0]][i-1];
@@ -152,7 +152,7 @@ module FreeCell(
             ({4'b10??, 4'b10??}): //free_cell to free_cell
             begin
                 if ((free_cells[source[1:0]] != 6'b000000) && (free_cells[dest[1:0]] == 6'b000000))
-                    begin
+                    begin//Free cell source is not empty and free cell dest is empty
                         free_cells[dest[1:0]] <= free_cells[source[1:0]];
                         free_cells[source[1:0]]<= 6'b000000;
                         illegal<= 1'b0;
@@ -165,7 +165,7 @@ module FreeCell(
 
             ({4'b10??, 4'b11??}): //free_cell to home_cell
             begin
-                case (free_cells[source[1:0]][5:4])
+                case (free_cells[source[1:0]][5:4]) //sort each card into its own home cell stack IF denomination is 1 above, free cell used as counter
                     s:
                     begin
                         if (home_cells[s]==((free_cells[source[1:0]][3:0]) - 1'b1))
