@@ -1,7 +1,8 @@
-module freecellPlayer (clock,source,dest,win);
+module freecellPlayer (clock,source,dest,win, illegal);
 input   [3:0] source, dest;
 input   clock;
 output  win;
+output illegal;
 
 always  @(posedge clock or source or dest)
     $display($time,"  %d %d", source,dest);
@@ -13,6 +14,7 @@ module testFreeCell;
     reg [3:0] dest;
     reg       clock;
     wire      win;
+    wire      illegal;
 
     // Convert the character notation into bit-level codes.
     function [3:0] encode;
@@ -180,6 +182,12 @@ module testFreeCell;
     always
     #5 clock = ~clock;
 
-    freecellPlayer FreeCell(clock,source,dest,win);
+    freecellPlayer FreeCell(
+        .clock(clock),
+        .source(source),
+        .dest(dest),
+        .win(win),
+        .illegal(illegal)
+    );
 
 endmodule // testFreeCell
