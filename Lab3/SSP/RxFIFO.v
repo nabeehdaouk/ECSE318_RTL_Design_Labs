@@ -1,7 +1,7 @@
-module TxFIFO (
-    input psel, pwrite, clr_b, pclk, inc_ptr,
-    input [7:0] pwdata,
-    output reg [7:0] txdata,
+module RxFIFO (
+    input psel, pwrite, clr_b, pclk, read_en,
+    input [7:0] rxdata,
+    output reg [7:0] prdata,
     output reg flag_empty, flag_full
 );
 
@@ -11,16 +11,16 @@ module TxFIFO (
     localparam write_mode = 1'b1;
     localparam read_mode = 1'b0;
     localparam read_enabled = 1'b1;
-    localparam read_disabled = 1'b0;    
+    localparam read_disabled = 1'b0;
 
     initial begin
         w_ptr = 3'b000;
         r_ptr = 3'b000;
     end
 
-    always @ (inc_ptr)
+    always @ (psel)
     begin
-        r_ptr <= (inc_ptr)? r_ptr + 1'b1 : r_ptr + 1'b0;
+        r_ptr <= (psel)? r_ptr + 1'b1 : r_ptr + 1'b0;
     end
 
     always @ (*)
@@ -41,25 +41,25 @@ module TxFIFO (
         end else begin
             case (pwrite)
                 write_mode:
-                case(psel)
-                    read_enabled:
-                    begin
-                        if(flag_full == 1'b0) begin
-                            mem[w_ptr[1:0]] <= pwdata;
-                            w_ptr = w_ptr + 1'b1;
-                        end  else begin // don't write if flag_full set high
-                        end
-                        txdata <= mem[r_ptr[1:0]];
-                        
-                    end
-                    read_disabled:
-                    begin
-                        txdata <= mem[r_ptr[1:0]];
-                      
-                    end
-                endcase
+                begin
+                end
                 read_mode:
-                begin // do nothing
+                begin
+                    case(read_en)
+                        read_enabled:
+                        begin
+                            if(flag_full == 1'b0) begin
+                                mem[w_ptr[1:0]] <= rxdata;
+                                w_ptr = w_ptr + 1'b1;
+                            end  else begin // don't write if flag_full set high
+                            end
+                            prdata <= mem[r_ptr[1:0]];
+                        end
+                        read_disabled:
+                        begin
+                            prdata <= mem[r_ptr[1:0]];
+                        end
+                    endcase
                 end
             endcase
         end
