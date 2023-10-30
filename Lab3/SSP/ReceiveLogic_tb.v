@@ -20,7 +20,7 @@ ReceiveLogic ReceiveLogic_instance(
 	initial begin
 	ssp_clk_in = 1'b1;
 	clr_b= 1; 
-	#20
+	#21 
 	clr_b=0;
 	
 	ssp_fss_in = 1'b1;
