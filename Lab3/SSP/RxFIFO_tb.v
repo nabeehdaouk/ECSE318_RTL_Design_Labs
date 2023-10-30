@@ -47,7 +47,7 @@ module RxFIFO_tb ();
         read_en = 1'b1;
         pwdata = 8'hc3;
 
-        #10
+        #50
         $display("tx_data: %h", txdata);
         $display("full: %b | empty: %b", flag_full, flag_empty);
         $display();

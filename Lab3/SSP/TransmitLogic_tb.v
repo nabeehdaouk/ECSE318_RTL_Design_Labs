@@ -11,7 +11,6 @@ module TransmitLogic_tb();
 	    .pclk(pclk),
 	    .clr_b(clr_b),
 	    .flag_empty(flag_empty),
-	    .flag_full(flag_full),
 	    .ssp_fss_out(ssp_fss_out),
 	    .ssp_oe_b(ssp_oe_b),
 	    .ssp_txd(ssp_txd),

@@ -7,6 +7,7 @@ module RxFIFO (
 
     reg [2:0] w_ptr, r_ptr; // [2] is the phase counter, [1:0] is the FIFO location counter
     reg [7:0] mem [3:0]; // Storage locations in FIFO
+    reg read_en_prev;
 
     localparam write_mode = 1'b1;
     localparam read_mode = 1'b0;
@@ -31,6 +32,7 @@ module RxFIFO (
 
     always @ (posedge (pclk | clr_b))
     begin
+        read_en_prev<= read_en;
         if(clr_b == 1'b1) begin
             mem[0] <= 8'b00000000;
             mem[1] <= 8'b00000000;
@@ -45,7 +47,7 @@ module RxFIFO (
                 end
                 read_mode:
                 begin
-                    case(read_en)
+                    case(read_en && (read_en != read_en_prev))
                         read_enabled:
                         begin
                             if(flag_full == 1'b0) begin

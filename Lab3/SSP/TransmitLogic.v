@@ -1,6 +1,6 @@
 module TransmitLogic(
     input [7:0] TxData,
-    input pclk, clr_b, flag_empty, flag_full,
+    input pclk, clr_b, flag_empty,
     output reg ssp_fss_out,
     output reg ssp_oe_b, ssp_txd, ssp_clk_out, inc_ptr
 );

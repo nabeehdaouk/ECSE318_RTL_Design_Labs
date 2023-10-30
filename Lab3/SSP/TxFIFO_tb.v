@@ -80,7 +80,7 @@ module TxFIFO_tb ();
 
         psel = 0;
         inc_ptr= 1;
-        #10
+        #100
         $display("tx_data: %h", txdata);
         $display("full: %b | empty: %b", flag_full, flag_empty);
         $display();

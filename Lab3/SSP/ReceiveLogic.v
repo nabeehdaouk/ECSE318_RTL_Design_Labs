@@ -1,7 +1,7 @@
 module ReceiveLogic( // add read_en timing and deal with flag_full ALSO inc_ptr timing for trsmait module
     output reg [7:0] RxData,
     output reg read_en,
-    input clr_b, flag_empty, flag_full,
+    input clr_b, flag_full,
     input ssp_fss_in, ssp_rxd, ssp_clk_in
 );
 
@@ -19,12 +19,12 @@ module ReceiveLogic( // add read_en timing and deal with flag_full ALSO inc_ptr 
             ctr <= 4'b0000;
             data <= 8'b00000000;
             end
-        if (((ssp_fss_in == 1'b0) && (ctr > 4'b1000)) || (ssp_fss_in == 1'b1))
+        if (((ssp_fss_in == 1'b0) && (ctr >= 4'b1000)) || (ssp_fss_in == 1'b1))
             begin
-                if(ssp_fss_in == 1'b1)
+                if((ssp_fss_in == 1'b1) && (flag_full == 1'b0))
                     begin
                         ctr <= 4'b1111;
-                        end else if((ssp_fss_in == 1'b0) && (ctr > 4'b1000))
+                        end else if((ssp_fss_in == 1'b0) && (ctr >= 4'b1000))
                 begin
                     data[ctr[2:0]] <= ssp_rxd;
                     ctr <= ctr - 1'b1;
@@ -36,7 +36,7 @@ module ReceiveLogic( // add read_en timing and deal with flag_full ALSO inc_ptr 
     end
     always @ (posedge ssp_clk_in)
     begin
-        if (ctr == 4'b1000)
+        if (ctr == 4'b0111)
         begin
             RxData <= data;
             read_en <= 1'b1;
@@ -44,6 +44,7 @@ module ReceiveLogic( // add read_en timing and deal with flag_full ALSO inc_ptr 
         if (read_en == 1'b1)
         begin
             read_en <= 1'b0;
+            ctr<= ctr -1'b1;
         end
     end
 endmodule

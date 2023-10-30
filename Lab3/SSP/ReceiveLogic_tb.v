@@ -10,7 +10,6 @@ ReceiveLogic ReceiveLogic_instance(
     .RxData(RxData),
     .read_en(read_en),
     .clr_b(clr_b),
-    .flag_empty(flag_empty),
     .flag_full(flag_full),
     .ssp_fss_in(ssp_fss_in),
     .ssp_rxd(ssp_rxd),
@@ -18,6 +17,7 @@ ReceiveLogic ReceiveLogic_instance(
 );
 	
 	initial begin
+	flag_full= 1'b0;
 	ssp_clk_in = 1'b1;
 	clr_b= 1; 
 	#21 
@@ -41,7 +41,27 @@ ReceiveLogic ReceiveLogic_instance(
     ssp_rxd= 1'b1;  
     #20
     ssp_rxd= 1'b0;
-    #1000
+    #200
+
+    ssp_fss_in = 1'b1;
+    #20
+    ssp_fss_in = 1'b0;
+    ssp_rxd= 1'b0;  
+    #20
+    ssp_rxd= 1'b1;
+    #20
+    ssp_rxd= 1'b0;  
+    #20
+    ssp_rxd= 1'b1;  
+    #20
+    ssp_rxd= 1'b0;  
+    #20
+    ssp_rxd= 1'b1;
+    #20
+    ssp_rxd= 1'b0;  
+    #20
+    ssp_rxd= 1'b1;
+    #300
 
 $stop;
 	
