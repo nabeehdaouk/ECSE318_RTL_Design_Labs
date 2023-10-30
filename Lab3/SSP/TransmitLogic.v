@@ -1,7 +1,7 @@
 module TransmitLogic(
     input [7:0] TxData,
     input pclk, clr_b, flag_empty, flag_full,
-    output ssp_fss_out,
+    output reg ssp_fss_out,
     output reg ssp_oe_b, ssp_txd, ssp_clk_out, inc_ptr
 );
 
@@ -21,7 +21,7 @@ module TransmitLogic(
         ssp_clk_out <= ~ssp_clk_out;
     end
 
-    assign ssp_fss_out = inc_ptr;
+    //assign ssp_fss_out = inc_ptr;
 
     always @(posedge ssp_clk_out, clr_b)
     begin
@@ -45,6 +45,7 @@ module TransmitLogic(
                     begin
                         data <= TxData;
                         data_read <= 1'b1;
+                        ssp_fss_out<= 1'b1;
                     end
                 else
                     begin
@@ -62,8 +63,9 @@ module TransmitLogic(
             ssp_txd <= data[7];
             data <= data<<1;
             counter<= counter +1'b1;
+            ssp_fss_out<= counter==(4'b0000)?1'b0:ssp_fss_out;
         end
-        if ((counter == 4'b1000) && (flag_empty == 1'b0))
+        if ((counter == 4'b1000) && (flag_empty == 1'b0) && (inc_ptr ==1'b0))
         begin
             inc_ptr<= 1'b1;
         end

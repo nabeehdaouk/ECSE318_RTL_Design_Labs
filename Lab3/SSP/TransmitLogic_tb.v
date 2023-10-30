@@ -29,14 +29,10 @@ module TransmitLogic_tb();
 	flag_empty= 0;
 	flag_full= 0;
 	
-	#60
-$display("EMOPTY FLAH");
-	flag_empty= 1;
-	#300
-$display("EMOPTY FLAH GONE");
+#60
     TxData= 8'b10101011;
     flag_empty= 0;
-    #300
+    #600
 	
     
     
