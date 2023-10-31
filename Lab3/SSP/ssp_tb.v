@@ -24,57 +24,47 @@ module ssp_tb ();
     clr_b = 1'b1;
     psel = 1'b0;
     #20
-
     clr_b = 1'b0;
     #10
-
     #10 pwrite = 1'b1;
+    
+    // Loading T FIFO data and transmitting
     pwdata = 8'h00;
     #10
     psel = 1'b1;
     #10
 
-    psel = 1'b0;
-    #10
     pwdata = 8'hd3;
     #10
-    psel = 1'b1;
-    #10
-    
-    psel = 1'b0;
-    #10
+
     pwdata = 8'ha7;
     #10
-    psel = 1'b1;
-    #10
 
-    psel = 1'b0;
-    #10
     pwdata = 8'hff;
     #10
-    psel = 1'b1;
+
+    pwdata = 8'h12;
     #10
 
     psel = 1'b0;
     #400
 
+    // Receiving data
     pwrite = 1'b0;
     #1500
 
+    // Pulling in and displaying data from R FIFO
     #10 psel = 1'b1;
-    #5 $display(prdata);
+    #10 $display(prdata);
     
-    #10 psel = 1'b0;
-    #10 psel = 1'b1;
-    #5 $display(prdata);
+    #10 $display(prdata);
 
-    #10 psel = 1'b0;
-    #10 psel = 1'b1;
-    #5 $display(prdata);
+    #10 $display(prdata);
+
+    #10 $display(prdata);
     
-    #10 psel = 1'b0;
-    #10 psel = 1'b1;
-    #5 $display(prdata);
+    #10 $display(prdata);
+    $stop;
 end
 
 

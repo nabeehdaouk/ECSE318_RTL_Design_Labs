@@ -19,7 +19,7 @@ module RxFIFO (
         r_ptr = 3'b000;
     end
 
-    always @ ((psel) && (~pwrite))
+    always @ (posedge (((psel) && (~pwrite)) && (pclk)))
     begin
         r_ptr <= (psel)? r_ptr + 1'b1 : r_ptr + 1'b0;
     end
