@@ -31,10 +31,8 @@ module TransRecLogic_tb ();
         TxData = 8'ha8;
         #250
 
-
-
         TxData = 8'hfa;
-        #200
+        #750
         t_empty = 1'b1;
         #500;
     end

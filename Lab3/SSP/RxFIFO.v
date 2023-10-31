@@ -19,7 +19,7 @@ module RxFIFO (
         r_ptr = 3'b000;
     end
 
-    always @ (psel)
+    always @ ((psel) && (~pwrite))
     begin
         r_ptr <= (psel)? r_ptr + 1'b1 : r_ptr + 1'b0;
     end
@@ -44,6 +44,19 @@ module RxFIFO (
             case (pwrite)
                 write_mode:
                 begin
+                    case(read_en && (read_en != read_en_prev))
+                        read_enabled:
+                        begin
+                            if(flag_full == 1'b0) begin
+                                mem[w_ptr[1:0]] <= rxdata;
+                                w_ptr = w_ptr + 1'b1;
+                            end  else begin // don't write if flag_full set high
+                            end
+                        end
+                        read_disabled:
+                        begin
+                        end
+                    endcase
                 end
                 read_mode:
                 begin

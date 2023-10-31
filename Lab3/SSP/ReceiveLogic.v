@@ -10,6 +10,7 @@ module ReceiveLogic( // add read_en timing and deal with flag_full ALSO inc_ptr 
 
     initial begin
         ctr = 4'b0000;
+        read_en = 1'b0;
     end
 
     always @ (posedge ssp_clk_in)

@@ -11,7 +11,7 @@ module TxFIFO (
     localparam write_mode = 1'b1;
     localparam read_mode = 1'b0;
     localparam read_enabled = 1'b1;
-    localparam read_disabled = 1'b0;    
+    localparam read_disabled = 1'b0;
 
     initial begin
         w_ptr = 3'b000;
@@ -50,16 +50,27 @@ module TxFIFO (
                         end  else begin // don't write if flag_full set high
                         end
                         txdata <= mem[r_ptr[1:0]];
-                        
+
                     end
                     read_disabled:
                     begin
                         txdata <= mem[r_ptr[1:0]];
-                      
+
                     end
                 endcase
                 read_mode:
-                begin // do nothing
+                begin
+                    case(psel)
+                        read_enabled:
+                        begin
+                            txdata <= mem[r_ptr[1:0]];
+                        end
+                        read_disabled:
+                        begin
+                            txdata <= mem[r_ptr[1:0]];
+
+                        end
+                    endcase
                 end
             endcase
         end
