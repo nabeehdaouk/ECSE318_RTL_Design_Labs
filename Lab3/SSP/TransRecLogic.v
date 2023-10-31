@@ -8,7 +8,7 @@ wire ssp_fss_out_in;
 wire ssp_txd;
 wire ssp_clk_out; 
 
-
+//transmit data fed back into recieve data at this level
 TransmitLogic TransmitLogic_instance(
     .TxData(TxData),
     .pclk(pclk),
