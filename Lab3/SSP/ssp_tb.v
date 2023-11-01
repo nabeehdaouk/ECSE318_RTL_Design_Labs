@@ -3,21 +3,26 @@ module ssp_tb ();
     reg psel, pwrite, clr_b, pclk;
     reg [7:0] pwdata;
     wire [7:0] prdata;
-    wire ssptxintr, ssprxintr, sspoe_b;
-
-
+    wire ssptxintr, ssprxintr, ssp_oe_b, ssp_fss_in_out, ssp_tr_xd, ssp_clk;
 
     ssp ssp_instance(
         .psel(psel),
         .pwrite(pwrite),
         .clr_b(clr_b),
         .pclk(pclk),
+        .ssp_fss_in(ssp_fss_in_out),
+        .ssp_rxd(ssp_tr_xd),
+        .ssp_clk_in(ssp_clk),
         .pwdata(pwdata),
         .ssptxintr(ssptxintr),
         .ssprxintr(ssprxintr),
-        .sspoe_b(sspoe_b),
+        .ssp_oe_b(ssp_oe_b),
+        .ssp_fss_out(ssp_fss_in_out),
+        .ssp_txd(ssp_tr_xd),
+        .ssp_clk_out(ssp_clk),
         .prdata(prdata)
     );
+
 
     initial begin
     $display("This testbench will load 4 bytes of data into the SSP");
