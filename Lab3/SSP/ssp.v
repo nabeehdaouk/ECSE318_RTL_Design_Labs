@@ -17,7 +17,7 @@ module ssp (
     TransmitLogic TransmitLogic_instance(
         .TxData(txdata),
         .pclk(pclk),
-        .clr_b(clr_b),
+        .clr_b(~clr_b), //make active low
         .flag_empty(t_flag_empty),
         .ssp_fss_out(ssp_fss_out),
         .ssp_oe_b(ssp_oe_b),
@@ -29,7 +29,7 @@ module ssp (
     ReceiveLogic ReceiveLogic_instance(
         .RxData(rxdata),
         .read_en(read_en),
-        .clr_b(clr_b),
+        .clr_b(~clr_b),
         .flag_full(r_flag_full),
         .ssp_fss_in(ssp_fss_in),
         .ssp_rxd(ssp_rxd),
@@ -39,7 +39,7 @@ module ssp (
     TxFIFO TxFIFO_instance(
         .psel(psel),
         .pwrite(pwrite),
-        .clr_b(clr_b),
+        .clr_b(~clr_b),
         .pclk(pclk),
         .inc_ptr(inc_ptr),
         .pwdata(pwdata),
@@ -51,7 +51,7 @@ module ssp (
     RxFIFO RxFIFO_instance(
         .psel(psel),
         .pwrite(pwrite),
-        .clr_b(clr_b),
+        .clr_b(~clr_b),
         .pclk(pclk),
         .read_en(read_en),
         .rxdata(rxdata),
