@@ -21,6 +21,7 @@ module ssp_test2;
         #40     data_in = 8'b00001111; //8'h0F
         #40     data_in = 8'b01010001; //8'h51
         #40     data_in = 8'b00100100; //8'h24
+        // Remaining data attempts to enter a full T FIFO, so T interrupt prevents remaining data from entering SSP
         #40     data_in = 8'b01100111; //8'h67
         #40     data_in = 8'b11110011; //8'hF3
         #40     data_in = 8'b10110110; //8'hB6
@@ -31,8 +32,12 @@ module ssp_test2;
         #80     pwrite = 1'b1;
         #40     psel = 1'b0;
         #3600   pwrite = 1'b0;
-                psel = 1'b1;
-        #40 $finish();
+        psel = 1'b1;
+        #20 $display("data_out: %b", data_out);
+        #40 $display("data_out: %b", data_out);
+        #40 $display("data_out: %b", data_out);
+        #40 $display("data_out: %b", data_out);
+        $stop;
     end
     
     always 
