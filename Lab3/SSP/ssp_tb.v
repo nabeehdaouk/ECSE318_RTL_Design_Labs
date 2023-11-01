@@ -30,10 +30,10 @@ module ssp_tb ();
     $display("By toggeleing the correct signals, we can send data in, and \n expect paralell data to be returned to the processor");
     $display("This testbench will also monitor the interupt signals \n alert the signal trigger via the console");
         pclk = 1'b0;
-        clr_b = 1'b1;
+        clr_b = 1'b0;
         psel = 1'b0;
         #20
-        clr_b = 1'b0;
+        clr_b = 1'b1;
         #10
         #10 pwrite = 1'b1;
 
