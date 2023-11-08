@@ -78,10 +78,6 @@ begin
                 Sum  => p(i + 4),
                 Cout => CI(i + 1)
             );
-        p(0) <= s_out_x0(0);
-        p(1) <= s_out_x1(0);
-        p(2) <= s_out_x2(0);
-        p(3) <= s_out_x3(0);
     end generate;
 
     process(s_out_x0(0), s_out_x1(0), s_out_x2(0), s_out_x3(0), s_out_x3(1), s_out_x3(2), s_out_x3(3))
@@ -90,9 +86,5 @@ begin
         p(1) <= s_out_x1(0);
         p(2) <= s_out_x2(0);
         p(3) <= s_out_x3(0);
-        p(4) <= s_out_x3(0);
-        p(5) <= s_out_x3(1);
-        p(6) <= s_out_x3(2);
-        p(7) <= s_out_x3(3);
     end process;
 end BehavioralPar;
