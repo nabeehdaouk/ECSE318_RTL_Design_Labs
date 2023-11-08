@@ -1,7 +1,5 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity parallel_multiplier is
@@ -13,17 +11,17 @@ entity parallel_multiplier is
 end parallel_multiplier;
 
 architecture BehavioralPar of parallel_multiplier is
+    
+    COMPONENT full_adder
+        PORT(
+            A, B, Cin : IN  std_logic;
+            Sum, Cout : OUT std_logic);
+    END COMPONENT;
+
     signal s_out_x0, s_out_x1, s_out_x2, s_out_x3 : std_logic_vector(4 downto 0);
     signal c_out_x0, c_out_x1, c_out_x2, c_out_x3 : std_logic_vector(3 downto 0);
     signal ab_x0, ab_x1, ab_x2, ab_x3             : std_logic_vector(3 downto 0);
     signal CI                                     : std_logic_vector(4 downto 0);
-
-    component full_adder
-        Port(
-            A, B, Cin : in  std_logic;
-            Sum, Cout : out std_logic
-        );
-    end component;
 
 begin
     CI(0)       <= '0';
@@ -34,7 +32,7 @@ begin
 
     fa : for i in 0 to 3 generate
         ab_x0(i) <= y(i) and x(0);
-        full_adder_i : full_adder
+        fa0 : full_adder
             port map(
                 A    => ab_x0(i),
                 B    => '0',
@@ -44,7 +42,7 @@ begin
             );
         ab_x1(i) <= y(i) and x(1);
 
-        full_adder_i_1 : full_adder
+        fa1 : full_adder
             port map(
                 A    => ab_x1(i),
                 B    => c_out_x0(i),
@@ -54,7 +52,7 @@ begin
             );
         ab_x2(i) <= y(i) and x(2);
 
-        full_adder_i_2 : full_adder
+        fa2 : full_adder
             port map(
                 A    => ab_x2(i),
                 B    => c_out_x1(i),
@@ -64,7 +62,7 @@ begin
             );
         ab_x3(i) <= y(i) and x(3);
 
-        full_adder_i_3 : full_adder
+        fa3 : full_adder
             port map(
                 A    => ab_x3(i),
                 B    => c_out_x2(i),
@@ -72,7 +70,7 @@ begin
                 Sum  => s_out_x3(i),
                 Cout => c_out_x3(i)
             );
-        full_adder_i_4 : full_adder
+        fa4 : full_adder
             port map(
                 A    => c_out_x3(i),
                 B    => s_out_x3(i + 1),
@@ -86,7 +84,7 @@ begin
         p(3) <= s_out_x3(0);
     end generate;
 
-    process
+    process(s_out_x0(0), s_out_x1(0), s_out_x2(0), s_out_x3(0), s_out_x3(1), s_out_x3(2), s_out_x3(3))
     begin
         p(0) <= s_out_x0(0);
         p(1) <= s_out_x1(0);
