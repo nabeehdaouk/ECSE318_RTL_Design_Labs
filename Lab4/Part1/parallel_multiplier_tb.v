@@ -32,7 +32,7 @@ parallel_multiplier parallel_multiplier_instance(
         y = 4'b1101;
         #100    $display("Multiplicand: %b *  Multiplier:%b   =  Product:%b", x, y, p);
                 $display("Multiplicand: %d *  Multiplier:%d   =  Product:%d", x, y, p);
-        
+        $stop;
     end
     
 endmodule
