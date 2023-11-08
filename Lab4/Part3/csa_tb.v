@@ -1,3 +1,5 @@
+//make sure to have part 1 closed or excluded from build as sim may be confused bc adder is present in both directories
+
 `timescale 1ps/1fs // Set timescale to 1 nanosecond with 1 picosecond precision
 
 module csa_tb(
