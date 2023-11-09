@@ -11,5 +11,5 @@ end entity FullSubtractor;
 architecture Behavioral of FullSubtractor is
 begin
     Difference <= A XOR B XOR BorrowIn;
-    BorrowOut <= (A AND (NOT B) AND (NOT BorrowIn)) OR ((NOT A) AND B AND BorrowIn);
+    BorrowOut <= ((NOT A) AND B) OR (((NOT A) OR B) AND BorrowIn);
 end architecture Behavioral;
