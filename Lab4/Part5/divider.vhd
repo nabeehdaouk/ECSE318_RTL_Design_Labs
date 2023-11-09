@@ -78,6 +78,49 @@ begin
                 d   => D0(i + 1)
             );
     end generate;
+           -- Wrap-around effect for Level 3
+    BitSubtractor_3_4 : BitSubtractor
+        Port Map (
+            y => Int_Divisor(4),
+            x => D4(3),
+            b_i => B_In3(4),
+            os => B_In3(5),
+            b_o => B_In3(0),
+            d => D3(0)
+        );
+
+    -- Wrap-around effect for Level 2
+    BitSubtractor_2_4 : BitSubtractor
+        Port Map (
+            y => Int_Divisor(4),
+            x => D3(3),
+            b_i => B_In2(4),
+            os => B_In2(5),
+            b_o => B_In2(0),
+            d => D2(0)
+        );
+
+    -- Wrap-around effect for Level 1
+    BitSubtractor_1_4 : BitSubtractor
+        Port Map (
+            y => Int_Divisor(4),
+            x => D2(3),
+            b_i => B_In1(4),
+            os => B_In1(5),
+            b_o => B_In1(0),
+            d => D1(0)
+        );
+
+    -- Wrap-around effect for Level 0
+    BitSubtractor_0_4 : BitSubtractor
+        Port Map (
+            y => Int_Divisor(4),
+            x => D1(3),
+            b_i => B_In0(4),
+            os => B_In0(5),
+            b_o => B_In0(0),
+            d => D0(0)
+        );
     -- Assign quotient and remainder
     Quotient  <= not (B_In3(5) & B_In2(5) & B_In1(5) & B_In0(5));
     Remainder <= D0(4 downto 1);
