@@ -1,31 +1,31 @@
-LIBRARY IEEE;
-USE IEEE.std_logic_1164.ALL;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
 
-ENTITY n_bit_subtractor IS 
-    GENERIC(n: INTEGER :=8);
-    PORT( 
-        A, B:   IN std_logic_vector (n-1 downto 0);
-        Bin:    IN std_logic;
-        Diff:   OUT std_logic_vector (n-1 downto 0);
-        Bout:   OUT std_logic
+entity BitSubtractor is
+    Port (
+        y, x, b_i, os : in STD_LOGIC;
+        b_o, d : out STD_LOGIC
     );
-END n_bit_subtractor;
+end entity BitSubtractor;
 
-ARCHITECTURE n_bit_subtractor_arch of n_bit_subtractor is
-    COMPONENT full_subtractor PORT(
-    A, B, Bin:  IN std_logic;
-    Diff, Bout: OUT std_logic);
-    END COMPONENT;
+architecture Behavioral of BitSubtractor is
+    signal diff : STD_LOGIC;
+begin
+    FullSubtractor_inst : entity work.FullSubtractor
+        Port Map (
+            A => x,
+            B => y,
+            BorrowIn => b_i,
+            Difference => diff,
+            BorrowOut => b_o
+        );
 
-
-signal borrow: std_logic_vector(n downto 0);
-
-BEGIN
-    borrow(0) <=Bin;
-    Bout <= borrow(n);
-
-FS: for i in 0 to n-1 generate
-    FS_i: full_subtractor PORT MAP (A(i), B(i), borrow(i), Diff(i), borrow(i+1));
-end generate;
-
-END;
+    process(diff, os, x)
+    begin
+        if os = '1' then
+            d <= x;
+        else
+            d <= diff;
+        end if;
+    end process;
+end architecture Behavioral;

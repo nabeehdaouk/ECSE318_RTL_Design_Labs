@@ -28,7 +28,7 @@ divider divider_instance(
         #100    $display("Dividend: %b *  Divisor: %b   =  Quotient: %b and Remainder: %d", dividend, divisor, quotient, remainder);
                 $display("Dividend: %d *  Divisor: %d   =  Quotient: %d and Remainder: %d", dividend, divisor, quotient, remainder);
         
-        
+        $stop;
     end
     
 endmodule

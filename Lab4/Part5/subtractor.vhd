@@ -1,17 +1,15 @@
-LIBRARY IEEE;
-USE IEEE.std_logic_1164.ALL;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
 
-ENTITY full_subtractor IS
-PORT (
-    A, B, Bin:  IN std_logic;
-    Diff, Bout: OUT std_logic
-);
+entity FullSubtractor is
+    Port (
+        A, B, BorrowIn : in STD_LOGIC;
+        Difference, BorrowOut : out STD_LOGIC
+    );
+end entity FullSubtractor;
 
-END full_subtractor;
-
-Architecture full_subtractor_arch OF full_subtractor IS
-
-BEGIN
-    Diff <= A XOR B XOR Bin;
-    Bout <= ((NOT A) AND B) OR ((NOT A) AND Bin) OR (B AND Bin);
-END full_subtractor_arch;
+architecture Behavioral of FullSubtractor is
+begin
+    Difference <= A XOR B XOR BorrowIn;
+    BorrowOut <= (A AND (NOT B) AND (NOT BorrowIn)) OR ((NOT A) AND B AND BorrowIn);
+end architecture Behavioral;
