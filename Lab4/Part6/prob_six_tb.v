@@ -9,14 +9,14 @@ module prob_six_tb(
 	wire behav_out;
 	
 	prob_six_struct prob_six_struct_instance(
-	    .out(struct_out),
+	    .out1(struct_out),
 	    .clk(clk),
 	    .E(E),
 	    .W(W)
 	);
 	
 	prob_six_behav prob_six_behav_instance(
-	    .out(behav_out),
+	    .out1(behav_out),
 	    .clk(clk),
 	    .E(E),
 	    .W(W)
@@ -64,6 +64,8 @@ module prob_six_tb(
         #100    
         $display("E: %b       W:%b       BEHAVIORAL_OUT:%b      STRUCTURAL_OUT:%b", E,W,behav_out, struct_out);
         $display;
+        
+        $stop;
     end
     
     always #5 clk = ~clk;
