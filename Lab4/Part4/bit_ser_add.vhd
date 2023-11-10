@@ -9,7 +9,8 @@ entity bit_ser_add is
         B : in STD_LOGIC;
         clr_n : in STD_LOGIC;
         set_n : in STD_LOGIC;
-        result : out STD_LOGIC_VECTOR (8 downto 0)
+        result : out STD_LOGIC_VECTOR (8 downto 0);
+        serial_result : out STD_LOGIC
     );
 end entity bit_ser_add;
 
@@ -22,6 +23,7 @@ begin
 
     -- Assign internal signal to the output port
     result <= result_internal;
+    serial_result <= result_internal(8);
 
     process(clk)
     begin

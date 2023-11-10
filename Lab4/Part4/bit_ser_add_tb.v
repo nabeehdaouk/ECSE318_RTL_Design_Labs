@@ -1,6 +1,7 @@
 module bit_ser_add_tb ();
     reg A, B, clk, clr_n,set_n;
     wire [8:0] result;
+    wire serial_result;
 
     bit_ser_add bit_ser_add_instance(
         .clk(clk),
@@ -8,8 +9,10 @@ module bit_ser_add_tb ();
         .B(B),
         .clr_n(clr_n),
         .set_n(set_n),
-        .result(result)
+        .result(result),
+        .serial_result(serial_result)
     );
+    
 
     initial begin
         //PROBLEM 1: A=7 and B=3
