@@ -1,11 +1,11 @@
-module SixteenBitCSA_tb;
+module SixteenBitRCA_tb;
 
   reg [15:0] A, B;
   reg Cin;
   wire [15:0] Sum;
   wire Cout;
 
-  SixteenBitCSA uut (
+  sixteen_bit_RCA uut (
     .A(A),
     .B(B),
     .Cin(Cin),
@@ -31,6 +31,7 @@ module SixteenBitCSA_tb;
     $display("Test Case 2: A=%h, B=%h, Cin=%b, Sum=%h, Cout=%b", A, B, Cin, Sum, Cout);
     $display("Test Case 2: A=%d, B=%d, Cin=%d, Sum=%d, Cout=%d", A, B, Cin, Sum, Cout);
     
+
 
 
     $stop; // End simulation
