@@ -31,7 +31,6 @@ module cache_ram (
                     endcase
             end
             write: begin
-                cache[index] <= data_in;
                 case(byte)
                         2'b00: begin
                             cache[index][7:0] <=data_in;
