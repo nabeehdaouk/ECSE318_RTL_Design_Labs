@@ -71,7 +71,7 @@ module cache_tb();
         paddress= 16'h0010;
         #100
         pstrobe= 1'b0;
-        #300
+        #600
         $display("%h", pdata_out);
 
 

@@ -26,7 +26,7 @@ module cache (
                     end else begin
                         sysrw <= 1'b1;
                         sysstrobe <= 1'b1;
-                        sysaddress <= {paddress[15:2], 2'b00}; //set byte bits to pull first byte
+                        sysaddress <= {paddress[13:0], 2'b00}; //set byte bits to pull first byte
                     end
                 end
                 if (sysstrobe) begin
@@ -38,32 +38,32 @@ module cache (
                     done <= 1'b0;
                 end
                 if (byte0) begin
-                    cache_ram[paddress[9:2]][7:0] <= sysdata_in;
+                    //cache_ram[paddress[9:2]][7:0] <= sysdata_in;
                     tag_ram[paddress[9:2]] <= paddress[15:10];
                     byte0 <= 1'b0;
                     byte1 <= 1'b1;
                     byte2 <= 1'b0;
                     byte3 <= 1'b0;
-                    sysaddress <= {paddress[15:2], 2'b01};
+                    sysaddress <= {paddress[13:0], 2'b01};
                 end
                 if (byte1) begin
-                    cache_ram[paddress[9:2]][15:8] <= sysdata_in;
+                    cache_ram[paddress[9:2]][7:0] <= sysdata_in;
                     byte0 <= 1'b0;
                     byte1 <= 1'b0;
                     byte2 <= 1'b1;
                     byte3 <= 1'b0;
-                    sysaddress <= {paddress[15:2], 2'b10};
+                    sysaddress <= {paddress[13:0], 2'b10};
                 end
                 if (byte2) begin
-                    cache_ram[paddress[9:2]][23:16] <= sysdata_in;
+                    cache_ram[paddress[9:2]][15:8] <= sysdata_in;
                     byte0 <= 1'b0;
                     byte1 <= 1'b0;
                     byte2 <= 1'b0;
                     byte3 <= 1'b1;
-                    sysaddress <= {paddress[15:2], 2'b11};
+                    sysaddress <= {paddress[13:0], 2'b11};
                 end
                 if (byte3) begin
-                    cache_ram[paddress[9:2]][31:24] <= sysdata_in;
+                    cache_ram[paddress[9:2]][23:16] <= sysdata_in;
                     byte0 <= 1'b0;
                     byte1 <= 1'b0;
                     byte2 <= 1'b0;
@@ -71,7 +71,8 @@ module cache (
                     done <= 1'b1;
                 end
                 if (done) begin
-                    pdata_out <= cache_ram[paddress[9:2]];
+                    cache_ram[paddress[9:2]][31:24] <= sysdata_in;
+                    pdata_out <= {sysdata_in, cache_ram[paddress[9:2]][23:0]};
                     done <= 1'b0;
                     pready <= 1'b1;
                 end

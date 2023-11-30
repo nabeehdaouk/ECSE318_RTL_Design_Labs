@@ -14,20 +14,34 @@ module memory (
 
 
     initial begin //for testing ‘10’,’20’,31,’80’,'51','57','58','59', '57', '51'
-        mem[val10[15:2]]= 32'haabbccdd;
-        mem[val20[15:2]]= 32'h11223344;
-        mem[val31[15:2]]= 32'h55667788;
+        //{mem[{val10[13:0], 2'b00}], mem[{val10[13:0], 2'b01}], mem[{val10[13:0], 2'b10}], mem[{val10[13:0], 2'b11}]}= 32'haabbccdd;
+        mem[{val10[13:0], 2'b11}]= 8'haa;
+        mem[{val10[13:0], 2'b10}]= 8'hbb;
+        mem[{val10[13:0], 2'b01}]= 8'hcc;
+        mem[{val10[13:0], 2'b00}]= 8'hdd;
+        
+        mem[{val20[13:0], 2'b11}]= 8'h11;
+        mem[{val20[13:0], 2'b10}]= 8'h22;
+        mem[{val20[13:0], 2'b01}]= 8'h33;
+        mem[{val20[13:0], 2'b00}]= 8'h44;
+        
+        mem[{val31[13:0], 2'b11}]= 8'h99;
+        mem[{val31[13:0], 2'b10}]= 8'h88;
+        mem[{val31[13:0], 2'b01}]= 8'h11;
+        mem[{val31[13:0], 2'b00}]= 8'h33;
+
+ 
     end
 
     always @ (posedge clk)
     begin
-        if (sysstrobe) begin
+        if (sysstrobe|~sysstrobe) begin
             case(sysrw)
                 read: begin
-                    sysdata_out <= mem[sysaddress[15:2]];
+                    sysdata_out <= mem[sysaddress];
                 end
                 write: begin
-                    mem[sysaddress[15:2]] <= sysdata_in;
+                    mem[sysaddress] <= sysdata_in;
                 end
             endcase
         end
