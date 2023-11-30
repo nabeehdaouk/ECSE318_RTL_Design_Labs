@@ -1,4 +1,4 @@
-module cache_top_tb();
+module cache_tb();
 
     reg clk, pstrobe, prw;
     reg [15:0] paddress;
@@ -12,7 +12,7 @@ module cache_top_tb();
     wire [7:0] sysdata_out, sysdata_in;
 
 
-    cache_top cache_top_instance(
+    cache cache_instance(
         .pdata_in(pdata_in),
         .paddress(paddress),
         .sysdata_in(sysdata_in),
