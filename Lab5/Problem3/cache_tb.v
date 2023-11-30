@@ -56,7 +56,7 @@ module cache_tb();
         $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
         #600
         $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
-        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display("CACHE MISS: note, delay of 600 as data had to be fetched from memmory");
         $display;
 
         pstrobe= 1'b1;
@@ -66,7 +66,7 @@ module cache_tb();
         $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
         #600
         $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
-        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display("CACHE MISS: note, delay of 600 as data had to be fetched from memmory");
         $display;
 
         pstrobe= 1'b1;
@@ -76,7 +76,7 @@ module cache_tb();
         $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
         #600
         $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
-        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display("CACHE MISS: note, delay of 600 as data had to be fetched from memmory");
         $display;
 
         pstrobe= 1'b1;
@@ -86,7 +86,7 @@ module cache_tb();
         $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
         #600
         $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
-        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display("CACHE MISS: note, delay of 600 as data had to be fetched from memmory");
         $display;
 
         pstrobe= 1'b1;
@@ -96,7 +96,7 @@ module cache_tb();
         $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
         #600
         $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
-        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display("CACHE MISS: note, delay of 600 as data had to be fetched from memmory");
         $display;
 
         pstrobe= 1'b1;
@@ -106,7 +106,7 @@ module cache_tb();
         $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
         #600
         $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
-        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display("CACHE MISS: note, delay of 600 as data had to be fetched from memmory");
         $display;
 
         pstrobe= 1'b1;
@@ -116,7 +116,7 @@ module cache_tb();
         $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
         #600
         $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
-        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display("CACHE MISS: note, delay of 600 as data had to be fetched from memmory");
         $display;
 
         pstrobe= 1'b1;
@@ -126,7 +126,7 @@ module cache_tb();
         $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
         #600
         $display("Data Out: %h,          Timestamp:%d", pdata_out, $time);
-        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display("CACHE MISS: note, delay of 600 as data had to be fetched from memmory");
         $display;
 
         pstrobe= 1'b1;
@@ -150,12 +150,15 @@ module cache_tb();
         $display;
 
 
+        $display("---------------------------------------------------------------");
 
     $display("TESTING WRITE");
+            $display("---------------------------------------------------------------");
+    
         pstrobe= 1'b1;
         prw= 1'b0;
         paddress= 16'h0099;
-        pdata_in= 32'ha1b2c3d4;
+        pdata_in= 32'ha123b456;
         #100
         pstrobe= 1'b0;
         $display("Address WRITE: %h          Timestamp:%d", paddress[7:0], $time);
