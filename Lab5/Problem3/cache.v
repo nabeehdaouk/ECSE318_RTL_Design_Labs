@@ -77,8 +77,69 @@ module cache (
                     pready <= 1'b1;
                 end
             end
+            
+            
             write: begin
+                if (pstrobe) begin
+                cache_ram[paddress[9:2]] <= pdata_in;
+                tag_ram[paddress[9:2]] <= paddress[15:10]; //write straight into cache
+                pready <= 1'b0;
+            end
+            else begin
+                    sysrw <= 1'b0;
+                    sysstrobe <= 1'b1;
+                    sysaddress <= {paddress[13:0], 2'b00};
+                end
+                if (sysstrobe) begin
+                    sysstrobe <= 1'b0;
+                    byte0 <= 1'b1;
+                    byte1 <= 1'b0;
+                    byte2 <= 1'b0;
+                    byte3 <= 1'b0;
+                    done <= 1'b0;
+                end
+                if (byte0) begin
 
+                    byte0 <= 1'b0;
+                    byte1 <= 1'b1;
+                    byte2 <= 1'b0;
+                    byte3 <= 1'b0;
+                    sysaddress <= {paddress[13:0], 2'b01};
+                    sysdata_out<= cache_ram[paddress[9:2]][7:0];//write each byte into mem at a time
+                end
+                if (byte1) begin
+
+                    byte0 <= 1'b0;
+                    byte1 <= 1'b0;
+                    byte2 <= 1'b1;
+                    byte3 <= 1'b0;
+                    sysaddress <= {paddress[13:0], 2'b10};
+                    sysdata_out<= cache_ram[paddress[9:2]][15:8];//write each byte into mem at a time
+                    
+                end
+                if (byte2) begin
+                  
+                    byte0 <= 1'b0;
+                    byte1 <= 1'b0;
+                    byte2 <= 1'b0;
+                    byte3 <= 1'b1;
+                    sysaddress <= {paddress[13:0], 2'b11};
+                    sysdata_out<= cache_ram[paddress[9:2]][23:16];//write each byte into mem at a time
+                end
+                if (byte3) begin
+                   
+                    byte0 <= 1'b0;
+                    byte1 <= 1'b0;
+                    byte2 <= 1'b0;
+                    byte3 <= 1'b0;
+                    done <= 1'b1;
+                    sysdata_out<= cache_ram[paddress[9:2]][31:24];//write each byte into mem at a time
+                end
+                if (done) begin
+                    done <= 1'b0;
+                    pready <= 1'b1;
+                end
+                
             end
         endcase
     end

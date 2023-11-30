@@ -72,7 +72,6 @@ module memory (
 
     always @ (posedge clk)
     begin
-        if (sysstrobe|~sysstrobe) begin
             case(sysrw)
                 read: begin
                     sysdata_out <= mem[sysaddress];
@@ -82,5 +81,4 @@ module memory (
                 end
             endcase
         end
-    end
 endmodule

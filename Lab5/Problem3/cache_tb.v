@@ -151,6 +151,30 @@ module cache_tb();
 
 
 
+    $display("TESTING WRITE");
+        pstrobe= 1'b1;
+        prw= 1'b0;
+        paddress= 16'h0099;
+        pdata_in= 32'h3456789a;
+        #100
+        pstrobe= 1'b0;
+        $display("Address WRITE: %h          Timestamp:%d", paddress[7:0], $time);
+        #800
+        $display("Data In: %h,          Timestamp:%d", pdata_in, $time);
+        $display;
+        
+        prw= 1'b1;
+        pstrobe= 1'b1;
+        paddress= 16'h0099;
+        #100
+        pstrobe= 1'b0;
+        $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
+        #100
+        $display("Data Out: %h,          Timestamp:%d", pdata_out, $time);
+        $display("NOTE: DELAY OF ONLY 100 AS CACHE HIT!!!!!!!!! as we just wrote there");       
+        $display("SINCE WRRITE OPPERARTION WRITES TO CACHE AS WELL");
+
+
 
 
 
