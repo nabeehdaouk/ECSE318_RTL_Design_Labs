@@ -39,40 +39,115 @@ module cache_tb();
 
 
     initial begin
+        $display("TESTING CACHE DESIGN...");
+        $display("Memory has been innitialized for this test via initial begin for testing purposes");
+        $display("---------------------------------------------------------------");
         clk = 0;
         pstrobe= 0;
         #1000
 
         pstrobe= 1'b1;
         prw= 1'b1;
-        
-        
+
+
         paddress= 16'h0010;
         #100
         pstrobe= 1'b0;
+        $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
         #600
-        $display("%h", pdata_out);
-        
+        $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
+        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display;
+
         pstrobe= 1'b1;
         paddress= 16'h0020;
         #100
         pstrobe= 1'b0;
+        $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
         #600
-        $display("%h", pdata_out);
+        $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
+        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display;
 
         pstrobe= 1'b1;
         paddress= 16'h0031;
         #100
         pstrobe= 1'b0;
+        $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
         #600
-        $display("%h", pdata_out);
-        
-         pstrobe= 1'b1;
-        paddress= 16'h0010;
+        $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
+        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display;
+
+        pstrobe= 1'b1;
+        paddress= 16'h0080;
         #100
         pstrobe= 1'b0;
-        #300
-        $display("%h", pdata_out);
+        $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
+        #600
+        $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
+        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display;
+
+        pstrobe= 1'b1;
+        paddress= 16'h0051;
+        #100
+        pstrobe= 1'b0;
+        $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
+        #600
+        $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
+        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display;
+
+        pstrobe= 1'b1;
+        paddress= 16'h0057;
+        #100
+        pstrobe= 1'b0;
+        $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
+        #600
+        $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
+        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display;
+
+        pstrobe= 1'b1;
+        paddress= 16'h0058;
+        #100
+        pstrobe= 1'b0;
+        $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
+        #600
+        $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
+        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display;
+
+        pstrobe= 1'b1;
+        paddress= 16'h0059;
+        #100
+        pstrobe= 1'b0;
+        $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
+        #600
+        $display("Data Out: %h,          Timestamp:%d", pdata_out, $time);
+        $display("note, delay of 600 as data had to be fetched from memmory");
+        $display;
+
+        pstrobe= 1'b1;
+        paddress= 16'h0057;
+        #100
+        pstrobe= 1'b0;
+        $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
+        #100
+        $display("Data Out: %h          Timestamp:%d", pdata_out, $time);
+        $display("NOTE: DELAY OF ONLY 100 AS CACHE HIT!!!!!!!!!");
+        $display();
+
+        pstrobe= 1'b1;
+        paddress= 16'h0051;
+        #100
+        pstrobe= 1'b0;
+        $display("Address Request: %h          Timestamp:%d", paddress[7:0], $time);
+        #100
+        $display("Data Out: %h,          Timestamp:%d", pdata_out, $time);
+        $display("NOTE: DELAY OF ONLY 100 AS CACHE HIT!!!!!!!!!");       
+        $display;
 
 
 
