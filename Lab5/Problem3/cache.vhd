@@ -101,15 +101,70 @@ begin
                         -- Finalize read operation
                         cache_ram(to_integer(unsigned(paddress(9 downto 2))))(31 downto 24) <= sysdata_in;
                         pdata_out                                                           <= sysdata_in & cache_ram(to_integer(unsigned(paddress(9 downto 2))))(23 downto 0);
+                        done                                                                <= '0';
+                        pready_internal                                                     <= '1';
+                    end if;
+
+                when write =>
+
+                    if pstrobe = '1' then
+                        cache_ram(to_integer(unsigned(paddress(9 downto 2)))) <= pdata_in;
+                        tag_ram(to_integer(unsigned(paddress(9 downto 2))))   <= paddress(15 downto 10);
+                        pready_internal                                       <= '0';
+                    else
+                        sysrw_internal     <= '0';
+                        sysstrobe_internal <= '1';
+                        sysaddress         <= paddress(13 downto 0) & "00";
+                    end if;
+
+                    if sysstrobe_internal = '1' then
+                        sysstrobe_internal <= '0';
+                        byte0              <= '1';
+                        byte1              <= '0';
+                        byte2              <= '0';
+                        byte3              <= '0';
+                        done               <= '0';
+                    end if;
+
+                    if byte0 = '1' then
+                        -- Write first byte
+                        byte0       <= '0';
+                        byte1       <= '1';
+                        sysdata_out <= cache_ram(to_integer(unsigned(paddress(9 downto 2))))(7 downto 0);
+                        sysaddress  <= paddress(13 downto 0) & "01";
+                    end if;
+
+                    if byte1 = '1' then
+                        -- Write second byte
+                        byte1       <= '0';
+                        byte2       <= '1';
+                        sysdata_out <= cache_ram(to_integer(unsigned(paddress(9 downto 2))))(15 downto 8);
+                        sysaddress  <= paddress(13 downto 0) & "10";
+                    end if;
+
+                    if byte2 = '1' then
+                        -- Write third byte
+                        byte2       <= '0';
+                        byte3       <= '1';
+                        sysdata_out <= cache_ram(to_integer(unsigned(paddress(9 downto 2))))(23 downto 16);
+                        sysaddress  <= paddress(13 downto 0) & "11";
+                    end if;
+
+                    if byte3 = '1' then
+                        -- Write fourth byte
+                        byte3       <= '0';
+                        done        <= '1';
+                        sysdata_out <= cache_ram(to_integer(unsigned(paddress(9 downto 2))))(31 downto 24);
+                        sysaddress  <= paddress(13 downto 0) & "00";
+                    end if;
+
+                    if done = '1' then
+                        -- Finalize write operation
                         done            <= '0';
                         pready_internal <= '1';
                     end if;
 
-                when write =>
-                    -- [Implement the logic for the write operation, using internal signals]
-
                 when others =>
-                    -- Handle undefined prw values if necessary
             end case;
         end if;
     end process;

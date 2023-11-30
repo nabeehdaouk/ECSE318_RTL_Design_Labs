@@ -155,7 +155,7 @@ module cache_tb();
         pstrobe= 1'b1;
         prw= 1'b0;
         paddress= 16'h0099;
-        pdata_in= 32'h3456789a;
+        pdata_in= 32'ha1b2c3d4;
         #100
         pstrobe= 1'b0;
         $display("Address WRITE: %h          Timestamp:%d", paddress[7:0], $time);
