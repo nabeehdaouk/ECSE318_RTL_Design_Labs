@@ -172,12 +172,7 @@ module cache_tb();
         #100
         $display("Data Out: %h,          Timestamp:%d", pdata_out, $time);
         $display("NOTE: DELAY OF ONLY 100 AS CACHE HIT!!!!!!!!! as we just wrote there");       
-        $display("SINCE WRRITE OPPERARTION WRITES TO CACHE AS WELL");
-
-
-
-
-
+        $display("SINCE WRRITE OPPERARTION WRITES TO CACHE AS WELL, also stored in memory");
 
 
         $stop;
