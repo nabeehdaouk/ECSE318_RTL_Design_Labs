@@ -1,0 +1,47 @@
+Gate XG13 of type 2
+  - Fanin: G11
+  - Fanout: G17
+Gate XG12 of type 4
+  - Fanin: G14
+  - Fanin: G11
+  - Fanout: G10
+Gate XG11 of type 4
+  - Fanin: G5
+  - Fanin: G9
+  - Fanout: G11
+Gate XG10 of type 6
+  - Fanin: G16
+  - Fanin: G15
+  - Fanout: G9
+Gate XG9 of type 4
+  - Fanin: G2
+  - Fanin: G12
+  - Fanout: G13
+Gate XG8 of type 5
+  - Fanin: G3
+  - Fanin: G8
+  - Fanout: G16
+Gate XG7 of type 5
+  - Fanin: G12
+  - Fanin: G8
+  - Fanout: G15
+Gate XG6 of type 4
+  - Fanin: G1
+  - Fanin: G7
+  - Fanout: G12
+Gate XG5 of type 3
+  - Fanin: G14
+  - Fanin: G6
+  - Fanout: G8
+Gate XG4 of type 2
+  - Fanin: G0
+  - Fanout: G14
+Gate XG3 of type 1
+  - Fanin: G13
+  - Fanout: G7
+Gate XG2 of type 1
+  - Fanin: G11
+  - Fanout: G6
+Gate XG1 of type 1
+  - Fanin: G10
+  - Fanout: G5

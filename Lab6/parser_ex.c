@@ -4,16 +4,16 @@
 #include <stdbool.h>
 
 #define MAX_GATE_NAME 10
-#define MAX_LINE_LENGTH 255
+#define MAX_LINE_LENGTH 4095
 
 typedef enum {
     GATE_UNKNOWN = -1,
     GATE_DFF = 1,
-    GATE_NOT,
-    GATE_AND,
-    GATE_NOR,
-    GATE_OR,
-    GATE_NAND
+    GATE_NOT = 2,
+    GATE_AND = 3,
+    GATE_NOR = 4,
+    GATE_OR = 5,
+    GATE_NAND= 6
 } GateType;
 
 typedef struct List {
@@ -84,11 +84,12 @@ GateType gateTypeFromString(char* type) {
     else if (strcmp(type, "nor") == 0) return GATE_NOR;
     else if (strcmp(type, "or") == 0) return GATE_OR;
     else if (strcmp(type, "nand") == 0) return GATE_NAND;
+    else if (strcmp(type, "dff") == 0) return GATE_DFF;
     return GATE_UNKNOWN;
 }
 
 int main() {
-    FILE* file = fopen("S27.txt", "r");
+    FILE* file = fopen("S35.txt", "r");
     if (file == NULL) {
         perror("Failed to open the file");
         return EXIT_FAILURE;
@@ -112,15 +113,13 @@ int main() {
         Gate_record* gate = findOrCreateGate(&head, gateName, type);
         char* firstConnection = strtok(NULL, " ,();\t\n"); // First connection is always fanout
 
-        if (firstConnection && firstConnection[0] == 'G') {
+        if (firstConnection) {
             addToList(&(gate->fanout), firstConnection);
         }
 
         char* connectionName;
         while ((connectionName = strtok(NULL, " ,();\t\n"))) {
-            if (connectionName[0] == 'G') { 
-                addToList(&(gate->fanin), connectionName);
-            }
+            addToList(&(gate->fanin), connectionName);
         }
     }
     
