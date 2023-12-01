@@ -1,0 +1,11 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/nabeehdaouk/source/repos/GitHub/ECSE318/Lab6/parser_ex'
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _createGate, symObjAddr: 0x0, symBinAddr: 0x100003730, symSize: 0xB4 }
+  - { offsetInCU: 0x14E, offset: 0x14E, size: 0x8, addend: 0x0, symName: _createGate, symObjAddr: 0x0, symBinAddr: 0x100003730, symSize: 0xB4 }
+  - { offsetInCU: 0x192, offset: 0x192, size: 0x8, addend: 0x0, symName: _addToList, symObjAddr: 0xB4, symBinAddr: 0x1000037E4, symSize: 0x7C }
+  - { offsetInCU: 0x1D2, offset: 0x1D2, size: 0x8, addend: 0x0, symName: _findOrCreateGate, symObjAddr: 0x130, symBinAddr: 0x100003860, symSize: 0xBC }
+  - { offsetInCU: 0x232, offset: 0x232, size: 0x8, addend: 0x0, symName: _gateTypeFromString, symObjAddr: 0x1EC, symBinAddr: 0x10000391C, symSize: 0x148 }
+  - { offsetInCU: 0x25A, offset: 0x25A, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x334, symBinAddr: 0x100003A64, symSize: 0x3DC }
+...
