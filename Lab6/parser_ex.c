@@ -17,7 +17,7 @@ typedef enum {
 } GateType;
 
 typedef struct List {
-    struct Gate_record* gate;
+    char name[MAX_GATE_NAME];
     struct List* next;
 } List;
 
@@ -50,13 +50,14 @@ Gate_record* createGate(char* name, GateType type) {
     return newGate;
 }
 
-void addToList(List** list, Gate_record* gate) {
+void addToList(List** list, char* name) {
     List* newList = (List*)malloc(sizeof(List));
     if (newList == NULL) {
         perror("Failed to allocate memory for a new list item");
         exit(EXIT_FAILURE);
     }
-    newList->gate = gate;
+    strncpy(newList->name, name, MAX_GATE_NAME);
+    newList->name[MAX_GATE_NAME - 1] = '\0'; // Ensure null termination
     newList->next = *list;
     *list = newList;
 }
@@ -106,17 +107,20 @@ int main() {
         if (type == GATE_UNKNOWN) continue;
 
         char* gateName = strtok(NULL, " ,();\t\n");
-        char* outputName;
-        char* inputName;
+        if (!gateName || gateName[0] != 'X' || gateName[1] != 'G') continue; // Skip if not an XG gate
 
-        while ((outputName = strtok(NULL, " ,();\t\n"))) {
-            if ((inputName = strtok(NULL, " ,();\t\n")) == NULL) break;
+        Gate_record* gate = findOrCreateGate(&head, gateName, type);
+        char* firstConnection = strtok(NULL, " ,();\t\n"); // First connection is always fanout
 
-            Gate_record* outputGate = findOrCreateGate(&head, outputName, type);
-            Gate_record* inputGate = findOrCreateGate(&head, inputName, GATE_UNKNOWN);
-            
-            addToList(&(outputGate->fanin), inputGate);
-            addToList(&(inputGate->fanout), outputGate);
+        if (firstConnection && firstConnection[0] == 'G') {
+            addToList(&(gate->fanout), firstConnection);
+        }
+
+        char* connectionName;
+        while ((connectionName = strtok(NULL, " ,();\t\n"))) {
+            if (connectionName[0] == 'G') { 
+                addToList(&(gate->fanin), connectionName);
+            }
         }
     }
     
@@ -126,10 +130,10 @@ int main() {
     for (Gate_record* current = head; current; current = current->next) {
         printf("Gate %s of type %d\n", current->GateName, current->GateType);
         for (List* f = current->fanin; f; f = f->next) {
-            printf("  - Fanin: %s\n", f->gate->GateName);
+            printf("  - Fanin: %s\n", f->name);
         }
         for (List* f = current->fanout; f; f = f->next) {
-            printf("  - Fanout: %s\n", f->gate->GateName);
+            printf("  - Fanout: %s\n", f->name);
         }
     }
 
