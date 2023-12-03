@@ -189,10 +189,6 @@ int main() {
     }
 
     // ... (remaining code)
-
-    return EXIT_SUCCESS;
-}
-
     // Free allocated memory
     while (head) {
         Gate_record* gate = head;
