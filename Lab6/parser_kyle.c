@@ -87,34 +87,46 @@ GateType gateTypeFromString(char* type) {
     else if (strcmp(type, "dff") == 0) return GATE_DFF;
     return GATE_UNKNOWN;
 }
-void setLevels(Gate_record* head) {
-    // Initialize levels of D flip-flop outputs and initial inputs to 0
+void assignLevels(Gate_record* head) {
+    // Initialize levels of DFF outputs and initial wires to 0
     for (Gate_record* current = head; current; current = current->next) {
-        if (current->GateType == GATE_DFF || current->output) {
+        if (current->GateType == GATE_DFF && current->fanout) {
+            current->Level = 0;
+            current->output = true;
+        } else if (current->fanout == NULL) {
             current->Level = 0;
         }
     }
 
-    // Perform breadth-first traversal to set levels for other gates
-    int currentLevel = 1;
-    bool changesMade = true;
-    while (changesMade) {
-        changesMade = false;
+    // Iterate until all gates have levels assigned
+    bool levelsAssigned;
+    do {
+        levelsAssigned = false;
         for (Gate_record* current = head; current; current = current->next) {
-            if (current->Level == currentLevel - 1) {
-                // Propagate level to fanout gates
-                for (List* f = current->fanout; f; f = f->next) {
-                    Gate_record* fanoutGate = findOrCreateGate(&head, f->name, GATE_UNKNOWN);
-                    if (fanoutGate->Level == -1 || fanoutGate->Level > currentLevel) {
-                        fanoutGate->Level = currentLevel;
-                        changesMade = true;
+            if (current->Level == -1) {
+                // Check if all fan-ins have levels assigned
+                bool allFaninsAssigned = true;
+                int maxFaninLevel = -1;
+                for (List* f = current->fanin; f; f = f->next) {
+                    Gate_record* faninGate = findOrCreateGate(&head, f->name, GATE_UNKNOWN);
+                    if (faninGate->Level == -1) {
+                        allFaninsAssigned = false;
+                        break;
+                    } else if (faninGate->Level > maxFaninLevel) {
+                        maxFaninLevel = faninGate->Level;
                     }
+                }
+
+                // If all fan-ins have levels assigned, assign the level to the current gate
+                if (allFaninsAssigned) {
+                    current->Level = maxFaninLevel + 1;
+                    levelsAssigned = true;
                 }
             }
         }
-        currentLevel++;
-    }
+    } while (levelsAssigned);
 }
+
 
 int main() {
     FILE* file = fopen("S35.txt", "r");
@@ -163,9 +175,9 @@ int main() {
             printf("  - Fanout: %s\n", f->name);
         }
     }
- setLevels(head);
+ assignLevels(head);
 
-    // Output the parsed gates with levels
+    // Output the parsed gates with assigned levels
     for (Gate_record* current = head; current; current = current->next) {
         printf("Gate %s of type %d at level %d\n", current->GateName, current->GateType, current->Level);
         for (List* f = current->fanin; f; f = f->next) {
@@ -175,6 +187,11 @@ int main() {
             printf("  - Fanout: %s\n", f->name);
         }
     }
+
+    // ... (remaining code)
+
+    return EXIT_SUCCESS;
+}
 
     // Free allocated memory
     while (head) {
