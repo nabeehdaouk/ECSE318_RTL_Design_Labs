@@ -87,48 +87,33 @@ GateType gateTypeFromString(char* type) {
     else if (strcmp(type, "dff") == 0) return GATE_DFF;
     return GATE_UNKNOWN;
 }
-
-typedef struct {
-    Gate_record* gate;
-    int level;
-} QueueItem;
-
-void assignLevels(Gate_record* head) {
-    int level = 0;
-    QueueItem* queue = (QueueItem*)malloc(sizeof(QueueItem));
-    int front = 0, rear = 0;
-
-    Gate_record* current = head;
-    while (current) {
-        if (current->Level == -1) {
-            // Unprocessed gate found, assign level and process fanout gates
-            current->Level = level++;
-            queue = (QueueItem*)realloc(queue, (rear + 1) * sizeof(QueueItem));
-            queue[rear].gate = current;
-            queue[rear].level = current->Level;
-            rear++;
-
-            for (List* f = current->fanout; f; f = f->next) {
-                Gate_record* fanoutGate = findOrCreateGate(&head, f->name, GATE_UNKNOWN);
-                if (fanoutGate->Level == -1) {
-                    queue = (QueueItem*)realloc(queue, (rear + 1) * sizeof(QueueItem));
-                    queue[rear].gate = fanoutGate;
-                    queue[rear].level = current->Level + 1;
-                    rear++;
-                }
-            }
-        }
-
-        if (front < rear) {
-            current = queue[front].gate;
-            level = queue[front].level;
-            front++;
-        } else {
-            current = NULL;
+void setLevels(Gate_record* head) {
+    // Initialize levels of D flip-flop outputs and initial inputs to 0
+    for (Gate_record* current = head; current; current = current->next) {
+        if (current->GateType == GATE_DFF || current->output) {
+            current->Level = 0;
         }
     }
 
-    free(queue);
+    // Perform breadth-first traversal to set levels for other gates
+    int currentLevel = 1;
+    bool changesMade = true;
+    while (changesMade) {
+        changesMade = false;
+        for (Gate_record* current = head; current; current = current->next) {
+            if (current->Level == currentLevel - 1) {
+                // Propagate level to fanout gates
+                for (List* f = current->fanout; f; f = f->next) {
+                    Gate_record* fanoutGate = findOrCreateGate(&head, f->name, GATE_UNKNOWN);
+                    if (fanoutGate->Level == -1 || fanoutGate->Level > currentLevel) {
+                        fanoutGate->Level = currentLevel;
+                        changesMade = true;
+                    }
+                }
+            }
+        }
+        currentLevel++;
+    }
 }
 
 int main() {
@@ -178,10 +163,9 @@ int main() {
             printf("  - Fanout: %s\n", f->name);
         }
     }
+ setLevels(head);
 
-    assignLevels(head);
-
-    // Output the parsed gates and their connections
+    // Output the parsed gates with levels
     for (Gate_record* current = head; current; current = current->next) {
         printf("Gate %s of type %d at level %d\n", current->GateName, current->GateType, current->Level);
         for (List* f = current->fanin; f; f = f->next) {
@@ -191,7 +175,6 @@ int main() {
             printf("  - Fanout: %s\n", f->name);
         }
     }
-
 
     // Free allocated memory
     while (head) {
