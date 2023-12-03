@@ -88,13 +88,13 @@ GateType gateTypeFromString(char* type) {
     return GATE_UNKNOWN;
 }
 void assignLevels(Gate_record* head) {
-    // Initialize levels of DFF outputs and initial wires to 0
+    // Initialize levels of input nodes (fanouts of DFFs) to 0
     for (Gate_record* current = head; current; current = current->next) {
         if (current->GateType == GATE_DFF && current->fanout) {
-            current->Level = 0;
-            current->output = true;
-        } else if (current->fanout == NULL) {
-            current->Level = 0;
+            for (List* f = current->fanout; f; f = f->next) {
+                Gate_record* inputNode = findOrCreateGate(&head, f->name, GATE_UNKNOWN);
+                inputNode->Level = 0;
+            }
         }
     }
 
@@ -190,8 +190,6 @@ int main() {
 
     // ... (remaining code)
 
-    return EXIT_SUCCESS;
-}
 
     // Free allocated memory
     while (head) {
