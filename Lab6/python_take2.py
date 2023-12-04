@@ -68,9 +68,6 @@ def read_circuit(filename):
 
             if not gate_list.find_gate(gate_name):
                 gate_list.add_gate(gate)
-    for wire in determine_inputs(nodes) + determine_dff_outputs(nodes):
-        if wire in nodes:
-            nodes[wire].Level = 0
 
     return gate_list, nodes
 
@@ -79,6 +76,25 @@ def determine_inputs(nodes):
 
 def determine_dff_outputs(nodes):
     return [node_name for node_name, node in nodes.items() if node.isDffFanout]
+
+def assign_levels(gate_list, nodes, initial_nodes):
+    for node_name in initial_nodes:
+        if node_name in nodes:
+            nodes[node_name].Level = 0
+
+    all_gates_assigned = False
+    while not all_gates_assigned:
+        all_gates_assigned = True
+        current = gate_list.head
+        while current:
+            if current.Level < 0:
+                if all(node.Level > -1 for node in current.fanin):
+                    highest_fanin_level = max(node.Level for node in current.fanin)
+                    current.Level = highest_fanin_level + 1
+                    if current.fanout:
+                        current.fanout.Level = current.Level
+                    all_gates_assigned = False
+            current = current.next
 
 def print_wires(nodes):
     print("List of all wires (nodes), their levels, and connected gates:")
@@ -94,53 +110,10 @@ def print_circuit(gate_list):
         print(f"Gate: {current.GateName}, Type: {current.GateType}, Level: {current.Level}, Fanout: {fanout_name}, Fanin: {fanin_names}")
         current = current.next
 
-# Level assignment algorithm
-global max
-max = -1
-
-def gate_marked(gate):
-    global max
-    max = -1
-    for node in gate.fanin:
-        e = node.gates[0]  # Assuming each node connects to only one gate
-        if e.Level < 0:
-            return False
-        if max < e.Level:
-            max = e.Level
-    return True
-
-def insert_fanout(gate, list_next):
-    if gate.fanout and gate.fanout.gates[0].Level < 0:  # Check if fanout gate's level is < 0
-        list_next.append(gate.fanout.gates[0])
-
-def assign_level(gates):
-    list_next = []
-    for gate in gates:
-        gate.Level = 0
-        insert_fanout(gate, list_next)
-
-    counter = 0
-    max_count = 10000
-    while list_next and counter < max_count:
-        current_list = list_next
-        list_next = []
-        for gate in current_list:
-            if gate_marked(gate):
-                gate.Level = max
-                insert_fanout(gate, list_next)
-        counter += 1
-
-    if counter >= max_count:
-        print("Asynchronous Feedback")
-        return False
-
-    return True
-
 # Example Usage
 gate_list, nodes = read_circuit('S27.txt')  # Replace with the correct path to your file
-input_gates = [nodes[wire].gates[0] for wire in determine_inputs(nodes)]  # Assuming each wire connects to only one gate
-dff_gates = [nodes[wire].gates[0] for wire in determine_dff_outputs(nodes)]  # Assuming each wire connects to only one gate
-
-assign_level(input_gates + dff_gates)
+input_nodes = determine_inputs(nodes)
+dff_output_nodes = determine_dff_outputs(nodes)
+assign_levels(gate_list, nodes, input_nodes + dff_output_nodes)
 print_circuit(gate_list)
 print_wires(nodes)
