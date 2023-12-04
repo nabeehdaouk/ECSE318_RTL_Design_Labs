@@ -1,221 +1,264 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
-#define MAX_GATE_NAME 10
-#define MAX_LINE_LENGTH 4095
-
-typedef enum {
-    GATE_UNKNOWN = -1,
-    GATE_DFF = 1,
-    GATE_NOT = 2,
-    GATE_AND = 3,
-    GATE_NOR = 4,
-    GATE_OR = 5,
-    GATE_NAND= 6
-} GateType;
-
-typedef struct List {
-    char name[MAX_GATE_NAME];
-    struct List* next;
-} List;
-
-typedef struct Gate_record {
-    char GateName[MAX_GATE_NAME];
-    GateType GateType;
+// Define structures
+struct Node {
+    char NodeName[50];
+    struct GateRecord* gates[50];
+    int isFanout;
+    int isDffFanout;
     int Level;
-    bool output;
+};
+
+struct GateRecord {
+    char GateName[50];
+    char GateType[50];
+    int Level;
+    int output;
     int Number;
-    List* fanin;
-    List* fanout;
-    struct Gate_record* next;
-} Gate_record;
+    struct Node* fanout;
+    struct Node* fanin[50];
+    struct GateRecord* next;
+};
 
-Gate_record* createGate(char* name, GateType type) {
-    Gate_record* newGate = (Gate_record*)malloc(sizeof(Gate_record));
-    if (newGate == NULL) {
-        perror("Failed to allocate memory for a new gate");
-        exit(EXIT_FAILURE);
+struct GateList {
+    struct GateRecord* head;
+};
+
+// Function prototypes
+struct GateRecord* find_gate(struct GateList* gate_list, char* name);
+void add_gate(struct GateList* gate_list, struct GateRecord* gate);
+void read_circuit(char* filename, struct GateList* gate_list, struct Node* nodes);
+void determine_inputs(struct Node* nodes, char* result[], int* size);
+void determine_dff_outputs(struct Node* nodes, char* result[], int* size);
+void assign_levels(struct GateList* gate_list, struct Node* nodes, char** initial_nodes, int initial_nodes_size, char** dff_output_nodes, int dff_output_nodes_size);
+void print_wires(struct Node* nodes);
+void print_circuit(struct GateList* gate_list);
+
+int main() {
+    struct GateList gate_list;
+    struct Node nodes[1000];
+
+    // Example Usage
+    read_circuit("S27.txt", &gate_list, nodes);
+
+    int input_nodes_size, dff_output_nodes_size;
+    char* input_nodes[100];
+    char* dff_output_nodes[100];
+
+    determine_inputs(nodes, input_nodes, &input_nodes_size);
+    determine_dff_outputs(nodes, dff_output_nodes, &dff_output_nodes_size);
+
+    char* all_initial_nodes[200];
+    for (int i = 0; i < input_nodes_size; ++i) {
+        all_initial_nodes[i] = input_nodes[i];
     }
-    strncpy(newGate->GateName, name, MAX_GATE_NAME);
-    newGate->GateName[MAX_GATE_NAME - 1] = '\0'; // Ensure null termination
-    newGate->GateType = type;
-    newGate->Level = -1; // Level will be set later
-    newGate->output = false; // Will be set later if this gate is a circuit output
-    newGate->Number = -1; // Number will be set later
-    newGate->fanin = NULL;
-    newGate->fanout = NULL;
-    newGate->next = NULL;
-    return newGate;
+    for (int i = 0; i < dff_output_nodes_size; ++i) {
+        all_initial_nodes[input_nodes_size + i] = dff_output_nodes[i];
+    }
+
+    assign_levels(&gate_list, nodes, all_initial_nodes, input_nodes_size, dff_output_nodes, dff_output_nodes_size);
+
+    print_circuit(&gate_list);
+    print_wires(nodes);
+
+    return 0;
 }
 
-void addToList(List** list, char* name) {
-    List* newList = (List*)malloc(sizeof(List));
-    if (newList == NULL) {
-        perror("Failed to allocate memory for a new list item");
-        exit(EXIT_FAILURE);
-    }
-    strncpy(newList->name, name, MAX_GATE_NAME);
-    newList->name[MAX_GATE_NAME - 1] = '\0'; // Ensure null termination
-    newList->next = *list;
-    *list = newList;
-}
+// Function implementations
 
-Gate_record* findOrCreateGate(Gate_record** head, char* name, GateType type) {
-    Gate_record* current = *head;
-    while (current) {
+struct GateRecord* find_gate(struct GateList* gate_list, char* name) {
+    struct GateRecord* current = gate_list->head;
+    while (current != NULL) {
         if (strcmp(current->GateName, name) == 0) {
             return current;
         }
         current = current->next;
     }
-    // Gate not found, create it
-    Gate_record* newGate = createGate(name, type);
-    newGate->next = *head;
-    *head = newGate;
-    return newGate;
+    return NULL;
 }
 
-GateType gateTypeFromString(char* type) {
-    if (strcmp(type, "dff1") == 0) return GATE_DFF;
-    else if (strcmp(type, "not") == 0) return GATE_NOT;
-    else if (strcmp(type, "and") == 0) return GATE_AND;
-    else if (strcmp(type, "nor") == 0) return GATE_NOR;
-    else if (strcmp(type, "or") == 0) return GATE_OR;
-    else if (strcmp(type, "nand") == 0) return GATE_NAND;
-    else if (strcmp(type, "dff") == 0) return GATE_DFF;
-    return GATE_UNKNOWN;
+void add_gate(struct GateList* gate_list, struct GateRecord* gate) {
+    if (gate_list->head == NULL) {
+        gate_list->head = gate;
+    } else {
+        struct GateRecord* current = gate_list->head;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = gate;
+    }
 }
-bool assignLevel(Gate_record* inputs, Gate_record* dffs, int maxCount) {
-    Gate_record* listNext = NULL;
 
-    // Initialize levels for input gates
-    for (Gate_record* l = inputs; l != NULL; l = l->next) {
-        l->Level = 0;
-        // Assuming insert_fanout inserts fanout gates to l->fanout
-        // You may need to adapt this based on your actual implementation
-        insertFanout(l, &listNext);
+void read_circuit(char* filename, struct GateList* gate_list, struct Node* nodes) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
     }
 
-    // Initialize levels for DFF gates
-    for (Gate_record* l = dffs; l != NULL; l = l->next) {
-        l->Level = 0;
-        // Assuming insert_fanout inserts fanout gates to l->fanout
-        // You may need to adapt this based on your actual implementation
-        insertFanout(l, &listNext);
-    }
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        char gate_type[50], gate_name[50], net_names[256];
+        int result = sscanf(line, "%s %s (%[^)])", gate_type, gate_name, net_names);
+        if (result != 3) {
+            continue;  // Skip lines without the expected format
+        }
 
-    int counter = 0;
+        struct GateRecord* gate = find_gate(gate_list, gate_name);
+        if (!gate) {
+            gate = (struct GateRecord*)malloc(sizeof(struct GateRecord));
+            strcpy(gate->GateName, gate_name);
+            strcpy(gate->GateType, gate_type);
+            gate->Level = -1;
+            gate->output = 0;
+            gate->Number = 0;
+            gate->fanout = NULL;
+            gate->next = NULL;
+            add_gate(gate_list, gate);
+        }
 
-    while (listNext != NULL && counter < maxCount) {
-        Gate_record* list = listNext;
-        listNext = NULL;
+        char* net_name = strtok(net_names, ",");
+        int i = 0;
+        while (net_name != NULL) {
+            struct Node* node = NULL;
+            for (int j = 0; j < 1000; ++j) {
+                if (strcmp(nodes[j].NodeName, net_name) == 0) {
+                    node = &nodes[j];
+                    break;
+                }
+            }
 
-        while (list != NULL) {
-            if (gateMarked(list)) {
-                list->Level = counter;
-                // Assuming insert_fanout inserts fanout gates to list->fanout
-                // You may need to adapt this based on your actual implementation
-                insertFanout(list, &listNext);
-                list = list->next;
+            if (!node) {
+                for (int j = 0; j < 1000; ++j) {
+                    if (nodes[j].NodeName[0] == '\0') {
+                        strcpy(nodes[j].NodeName, net_name);
+                        node = &nodes[j];
+                        break;
+                    }
+                }
+            }
+
+            if (i == 0) {
+                gate->fanout = node;
+                node->isFanout = 1;
+                if (strncmp(gate_type, "DFF", 3) == 0) {
+                    node->isDffFanout = 1;
+                }
             } else {
-                Gate_record* temp = list->next;
-                list->next = listNext;
-                listNext = list;
-                list = temp;
+                gate->fanin[i - 1] = node;
+            }
+
+            node->gates[node->isDffFanout ? 0 : node->isFanout ? 1 : 0] = gate;
+            ++i;
+            net_name = strtok(NULL, ",");
+        }
+    }
+
+    fclose(file);
+}
+
+void determine_inputs(struct Node* nodes, char* result[], int* size) {
+    *size = 0;
+    for (int i = 0; i < 1000; ++i) {
+        if (nodes[i].NodeName[0] != '\0' && !nodes[i].isFanout) {
+            result[(*size)++] = nodes[i].NodeName;
+        }
+    }
+}
+
+void determine_dff_outputs(struct Node* nodes, char* result[], int* size) {
+    *size = 0;
+    for (int i = 0; i < 1000; ++i) {
+        if (nodes[i].NodeName[0] != '\0' && nodes[i].isDffFanout) {
+            result[(*size)++] = nodes[i].NodeName;
+        }
+    }
+}
+
+void assign_levels(struct GateList* gate_list, struct Node* nodes, char** initial_nodes, int initial_nodes_size, char** dff_output_nodes, int dff_output_nodes_size) {
+    for (int i = 0; i < initial_nodes_size; ++i) {
+        for (int j = 0; j < 1000; ++j) {
+            if (strcmp(nodes[j].NodeName, initial_nodes[i]) == 0) {
+                nodes[j].Level = 0;
+                break;
             }
         }
-        counter++;
     }
 
-    if (counter >= maxCount) {
-        printf("Asynchronous Feedback\n");
-        return false;
+    for (int i = 0; i < dff_output_nodes_size; ++i) {
+        for (int j = 0; j < 1000; ++j) {
+            if (strcmp(nodes[j].NodeName, dff_output_nodes[i]) == 0) {
+                nodes[j].Level = 0;
+                nodes[j].isDffFanout = 1;
+                break;
+            }
+        }
     }
 
-    return true;
+    struct GateRecord* current = gate_list->head;
+    while (current != NULL) {
+        if (strncmp(current->GateType, "DFF", 3) == 0) {
+            current->Level = 0;
+        }
+        current = current->next;
+    }
+
+    int all_gates_assigned = 0;
+    while (!all_gates_assigned) {
+        all_gates_assigned = 1;
+        struct GateRecord* current = gate_list->head;
+        while (current != NULL) {
+            if (current->Level < 0) {
+                int all_assigned = 1;
+                for (int i = 0; i < 50 && current->fanin[i] != NULL; ++i) {
+                    if (current->fanin[i]->Level < 0) {
+                        all_assigned = 0;
+                        break;
+                    }
+                }
+
+                if (all_assigned) {
+                    int highest_fanin_level = -1;
+                    for (int i = 0; i < 50 && current->fanin[i] != NULL; ++i) {
+                        if (current->fanin[i]->Level > highest_fanin_level) {
+                            highest_fanin_level = current->fanin[i]->Level;
+                        }
+                    }
+
+                    current->Level = highest_fanin_level + 1;
+                    if (current->fanout && !current->fanout->isDffFanout) {
+                        current->fanout->Level = current->Level;
+                    }
+
+                    all_gates_assigned = 0;
+                }
+            }
+            current = current->next;
+        }
+    }
 }
 
-
-int main() {
-    FILE* file = fopen("S35.txt", "r");
-    if (file == NULL) {
-        perror("Failed to open the file");
-        return EXIT_FAILURE;
+void print_wires(struct Node* nodes) {
+    printf("List of all wires (nodes), their levels, and connected gates:\n");
+    for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
+        printf("Wire: %s, Level: %d, Connected Gates: ", nodes[i].NodeName, nodes[i].Level);
+        for (int j = 0; j < 50 && nodes[i].gates[j] != NULL; ++j) {
+            printf("%s, ", nodes[i].gates[j]->GateName);
+        }
+        printf("\n");
     }
-    
-    char line[MAX_LINE_LENGTH];
-    Gate_record* head = NULL;
+}
 
-    while (fgets(line, sizeof(line), file)) {
-        if (line[0] == '\n' || line[0] == '/') continue; // Skip empty lines and comments
-        
-        char* token = strtok(line, " ,();\t\n");
-        if (token == NULL) continue;
-        
-        GateType type = gateTypeFromString(token);
-        if (type == GATE_UNKNOWN) continue;
-
-        char* gateName = strtok(NULL, " ,();\t\n");
-        if (!gateName || gateName[0] != 'X' || gateName[1] != 'G') continue; // Skip if not an XG gate
-
-        Gate_record* gate = findOrCreateGate(&head, gateName, type);
-        char* firstConnection = strtok(NULL, " ,();\t\n"); // First connection is always fanout
-
-        if (firstConnection) {
-            addToList(&(gate->fanout), firstConnection);
+void print_circuit(struct GateList* gate_list) {
+    struct GateRecord* current = gate_list->head;
+    while (current != NULL) {
+        printf("Gate: %s, Type: %s, Level: %d, Fanout: %s, Fanin: ", current->GateName, current->GateType, current->Level, current->fanout ? current->fanout->NodeName : "None");
+        for (int i = 0; i < 50 && current->fanin[i] != NULL; ++i) {
+            printf("%s, ", current->fanin[i]->NodeName);
         }
-
-        char* connectionName;
-        while ((connectionName = strtok(NULL, " ,();\t\n"))) {
-            addToList(&(gate->fanin), connectionName);
-        }
+        printf("\n");
+        current = current->next;
     }
-    
-    fclose(file);
-
-    // Output the parsed gates and their connections
-    for (Gate_record* current = head; current; current = current->next) {
-        printf("Gate %s of type %d\n", current->GateName, current->GateType);
-        for (List* f = current->fanin; f; f = f->next) {
-            printf("  - Fanin: %s\n", f->name);
-        }
-        for (List* f = current->fanout; f; f = f->next) {
-            printf("  - Fanout: %s\n", f->name);
-        }
-    }
-
-    if (!assignLevel(head, NULL, 100)) {
-        // Handle asynchronous feedback error
-        return EXIT_FAILURE;
-    }
-
-    // Output the parsed gates and their connections with levels
-    for (Gate_record* current = head; current; current = current->next) {
-        printf("Gate %s of type %d at level %d\n", current->GateName, current->GateType, current->Level);
-        for (List* f = current->fanin; f; f = f->next) {
-            printf("  - Fanin: %s\n", f->name);
-        }
-        for (List* f = current->fanout; f; f = f->next) {
-            printf("  - Fanout: %s\n", f->name);
-        }
-    }
-    // Free allocated memory
-    while (head) {
-        Gate_record* gate = head;
-        head = head->next;
-        List* list;
-        while ((list = gate->fanin)) {
-            gate->fanin = list->next;
-            free(list);
-        }
-        while ((list = gate->fanout)) {
-            gate->fanout = list->next;
-            free(list);
-        }
-        free(gate);
-    }
-
-    return EXIT_SUCCESS;
 }
