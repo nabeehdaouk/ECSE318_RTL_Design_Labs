@@ -14,8 +14,6 @@ class GateRecord:
         self.gate_name = name
         self.gate_type = gate_type
         self.level = -1
-        self.output = False
-        self.number = -1
         self.fanin = []
         self.fanout = []
 
@@ -26,13 +24,10 @@ def add_to_list(node_list, name):
     if name not in node_list:
         node_list.append(name)
 
-def find_or_create_gate(head, name, gate_type):
-    for gate in head:
-        if gate.gate_name == name:
-            return gate
-    new_gate = create_gate(name, gate_type)
-    head.append(new_gate)
-    return new_gate
+def find_or_create_gate(gates, name, gate_type):
+    if name not in gates:
+        gates[name] = create_gate(name, gate_type)
+    return gates[name]
 
 def gate_type_from_string(type_str):
     return {
@@ -46,9 +41,26 @@ def gate_type_from_string(type_str):
     }.get(type_str, GateType.UNKNOWN)
 
 def parse_line(line):
-    # Remove parentheses, split by semicolons, commas, and spaces
     cleaned_line = re.sub(r'[();]', ' ', line).replace(',', ' ')
     return cleaned_line.split()
+
+def assign_levels(gates, input_nodes, dff_nodes):
+    level = 0
+    next_level_gates = input_nodes + dff_nodes
+
+    while next_level_gates:
+        current_level_gates = next_level_gates
+        next_level_gates = []
+
+        for gate_name in current_level_gates:
+            gate = gates.get(gate_name)
+            if gate and gate.level == -1:
+                gate.level = level
+                for fanout_name in gate.fanout:
+                    if gates.get(fanout_name).level == -1:
+                        next_level_gates.append(fanout_name)
+
+        level += 1
 
 def main():
     try:
@@ -58,7 +70,7 @@ def main():
         print("Failed to open the file")
         return
 
-    head = []
+    gates = {}
     dff_nodes = []
     input_nodes = []
 
@@ -80,27 +92,20 @@ def main():
             continue
 
         gate_name = tokens[1]
-        gate = find_or_create_gate(head, gate_name, gate_type)
+        gate = find_or_create_gate(gates, gate_name, gate_type)
 
-        # First token after the gate name is fanout, the rest are fanins
         for i, connection_name in enumerate(tokens[2:]):
-            if i == 0:  # First connection is fanout
+            if i == 0:
                 add_to_list(gate.fanout, connection_name)
-                if gate_type==1:
+                if gate_type == GateType.DFF:
                     add_to_list(dff_nodes, connection_name)
-            else:  # Remaining connections are fanin
+            else:
                 add_to_list(gate.fanin, connection_name)
 
-    print("Nodes that outputs of DFF gates:")
-    for name in dff_nodes:
-        print(name)
+    assign_levels(gates, input_nodes, dff_nodes)
 
-    print("Input nodes of the circuit:")
-    for name in input_nodes:
-        print(name)
-
-    for gate in head:
-        print(f"Gate {gate.gate_name} of type {gate.gate_type}")
+    for gate in gates.values():
+        print(f"Gate {gate.gate_name} (Level {gate.level}) of type {gate.gate_type}")
         for fanin in gate.fanin:
             print(f"  - Fanin: {fanin}")
         for fanout in gate.fanout:
