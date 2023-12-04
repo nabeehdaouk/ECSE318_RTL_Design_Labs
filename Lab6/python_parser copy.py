@@ -72,39 +72,48 @@ def insert_fanout(gate, fanout_list):
 # Define the Max_count variable
 Max_count = 10000
 
-# Modify the assign_levels function to incorporate the logic
 def assign_levels(gates, input_nodes, dff_nodes, wire_records):
-    max_level = [-1]
-    ListNext = None
+    # Set initial levels for input and DFF gates, and their fanouts
+    for gate_name in input_nodes + dff_nodes:
+        if gate_name in gates:
+            gates[gate_name].level = 0
+            for fanout in gates[gate_name].fanout:
+                for wire in wire_records:
+                    if wire.wire_name == fanout:
+                        wire.level = 1  # Set fanout wires of level 0 gates to level 1
 
-    for input_gate_name in input_nodes + dff_nodes:
-        input_gate = gates.get(input_gate_name)
-        if input_gate:
-            input_gate.level = 0
-            ListNext = insert_fanout(input_gate, ListNext)
+    # Iteratively update the levels
+    for current_level in range(1, 11):  # Iterate through levels 1 to 10
+        for gate in gates.values():
+            if gate.level == -1:  # Process only gates whose level is not yet set
+                fanin_levels = [gates[fanin].level for fanin in gate.fanin if fanin in gates]
+                if fanin_levels:  # Ensure fanin_levels is not empty
+                    max_fanin_level = max(fanin_levels)
+                    gate.level = max_fanin_level + 1
+                    for fanout in gate.fanout:
+                        for wire in wire_records:
+                            if wire.wire_name == fanout:
+                                wire.level = max(wire.level, gate.level + 1)
+                else:
+                    print(f"Gate {gate.gate_name} has no valid fanin gates or they are not processed yet.")
 
-        
-    Counter = 0
-    while ListNext is not None and Counter < Max_count:
-        List = ListNext
-        ListNext = None
-        while List is not None:
-            if gate_marked(List.g, max_level):
-                List.g.level = max_level[0]
-                ListNext = insert_fanout(List.g, ListNext)
-                List = List.next
-            else:
-                temp = List.next
-                List.next = ListNext
-                ListNext = List
-                List = temp
-        Counter += 1
+    # Diagnostic output to check gate and wire levels
+    for gate in gates.values():
+        print(f"Gate {gate.gate_name} (Level {gate.level})")
+    for wire in wire_records:
+        print(f"Wire {wire.wire_name} (Level {wire.level})")
 
-    if Counter >= Max_count:
-        print("Asynchronous Feedback")
-        return False
+    # Check for any gates or wires that still have level -1
+    for gate in gates.values():
+        if gate.level == -1:
+            print(f"Gate {gate.gate_name} could not have its level determined.")
+    for wire in wire_records:
+        if wire.level == -1:
+            print(f"Wire {wire.wire_name} could not have its level determined.")
 
     return True
+
+
 
 # Define the print_wire_levels function
 def print_wire_levels(wire_records):
