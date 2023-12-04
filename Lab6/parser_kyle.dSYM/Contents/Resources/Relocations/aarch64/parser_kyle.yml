@@ -2,11 +2,13 @@
 triple:          'arm64-apple-darwin'
 binary-path:     '/Users/nabeehdaouk/source/repos/GitHub/ECSE318/Lab6/parser_kyle'
 relocations:
-  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _createGate, symObjAddr: 0x0, symBinAddr: 0x100003380, symSize: 0xB4 }
-  - { offsetInCU: 0x14E, offset: 0x14E, size: 0x8, addend: 0x0, symName: _createGate, symObjAddr: 0x0, symBinAddr: 0x100003380, symSize: 0xB4 }
-  - { offsetInCU: 0x192, offset: 0x192, size: 0x8, addend: 0x0, symName: _addToList, symObjAddr: 0xB4, symBinAddr: 0x100003434, symSize: 0x8C }
-  - { offsetInCU: 0x1D2, offset: 0x1D2, size: 0x8, addend: 0x0, symName: _findOrCreateGate, symObjAddr: 0x140, symBinAddr: 0x1000034C0, symSize: 0xBC }
-  - { offsetInCU: 0x232, offset: 0x232, size: 0x8, addend: 0x0, symName: _gateTypeFromString, symObjAddr: 0x1FC, symBinAddr: 0x10000357C, symSize: 0x178 }
-  - { offsetInCU: 0x25A, offset: 0x25A, size: 0x8, addend: 0x0, symName: _assignLevels, symObjAddr: 0x374, symBinAddr: 0x1000036F4, symSize: 0x1FC }
-  - { offsetInCU: 0x326, offset: 0x326, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x570, symBinAddr: 0x1000038F0, symSize: 0x52C }
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x10000303C, symSize: 0xD0 }
+  - { offsetInCU: 0x12B, offset: 0x12B, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x10000303C, symSize: 0xD0 }
+  - { offsetInCU: 0x161, offset: 0x161, size: 0x8, addend: 0x0, symName: _read_circuit, symObjAddr: 0xD0, symBinAddr: 0x10000310C, symSize: 0x438 }
+  - { offsetInCU: 0x290, offset: 0x290, size: 0x8, addend: 0x0, symName: _assign_levels, symObjAddr: 0x508, symBinAddr: 0x100003544, symSize: 0x320 }
+  - { offsetInCU: 0x34E, offset: 0x34E, size: 0x8, addend: 0x0, symName: _print_circuit, symObjAddr: 0x828, symBinAddr: 0x100003864, symSize: 0x170 }
+  - { offsetInCU: 0x39C, offset: 0x39C, size: 0x8, addend: 0x0, symName: _print_wires, symObjAddr: 0x998, symBinAddr: 0x1000039D4, symSize: 0x154 }
+  - { offsetInCU: 0x3F8, offset: 0x3F8, size: 0x8, addend: 0x0, symName: _print_level_summary, symObjAddr: 0xAEC, symBinAddr: 0x100003B28, symSize: 0x188 }
+  - { offsetInCU: 0x462, offset: 0x462, size: 0x8, addend: 0x0, symName: _find_gate, symObjAddr: 0xC74, symBinAddr: 0x100003CB0, symSize: 0x88 }
+  - { offsetInCU: 0x4A6, offset: 0x4A6, size: 0x8, addend: 0x0, symName: _add_gate, symObjAddr: 0xCFC, symBinAddr: 0x100003D38, symSize: 0x84 }
 ...

@@ -30,44 +30,28 @@ struct GateList {
 struct GateRecord* find_gate(struct GateList* gate_list, char* name);
 void add_gate(struct GateList* gate_list, struct GateRecord* gate);
 void read_circuit(char* filename, struct GateList* gate_list, struct Node* nodes);
-void determine_inputs(struct Node* nodes, char* result[], int* size);
-void determine_dff_outputs(struct Node* nodes, char* result[], int* size);
-void assign_levels(struct GateList* gate_list, struct Node* nodes, char** initial_nodes, int initial_nodes_size, char** dff_output_nodes, int dff_output_nodes_size);
+void assign_levels(struct GateList* gate_list, struct Node* nodes);
 void print_wires(struct Node* nodes);
 void print_circuit(struct GateList* gate_list);
+void print_level_summary(struct GateList* gate_list);
 
 int main() {
-    struct GateList gate_list;
-    struct Node nodes[1000];
+    struct GateList gate_list = { NULL };
+    struct Node nodes[1000] = { 0 };
 
-    // Example Usage
-    read_circuit("S27.txt", &gate_list, nodes);
-
-    int input_nodes_size, dff_output_nodes_size;
-    char* input_nodes[100];
-    char* dff_output_nodes[100];
-
-    determine_inputs(nodes, input_nodes, &input_nodes_size);
-    determine_dff_outputs(nodes, dff_output_nodes, &dff_output_nodes_size);
-
-    char* all_initial_nodes[200];
-    for (int i = 0; i < input_nodes_size; ++i) {
-        all_initial_nodes[i] = input_nodes[i];
-    }
-    for (int i = 0; i < dff_output_nodes_size; ++i) {
-        all_initial_nodes[input_nodes_size + i] = dff_output_nodes[i];
-    }
-
-    assign_levels(&gate_list, nodes, all_initial_nodes, input_nodes_size, dff_output_nodes, dff_output_nodes_size);
+    read_circuit("S27.txt", &gate_list, nodes);  // Replace with the correct path to your file
+    assign_levels(&gate_list, nodes);
 
     print_circuit(&gate_list);
     print_wires(nodes);
+    print_level_summary(&gate_list);
 
     return 0;
 }
 
 // Function implementations
 
+// Function implementations
 struct GateRecord* find_gate(struct GateList* gate_list, char* name) {
     struct GateRecord* current = gate_list->head;
     while (current != NULL) {
@@ -143,7 +127,7 @@ void read_circuit(char* filename, struct GateList* gate_list, struct Node* nodes
             if (i == 0) {
                 gate->fanout = node;
                 node->isFanout = 1;
-                if (strncmp(gate_type, "DFF", 3) == 0) {
+                if ((strncmp(gate_type, "dff1", 3) == 0)||(strncmp(gate_type, "dff", 3) == 0)) {
                     node->isDffFanout = 1;
                 }
             } else {
@@ -159,56 +143,25 @@ void read_circuit(char* filename, struct GateList* gate_list, struct Node* nodes
     fclose(file);
 }
 
-void determine_inputs(struct Node* nodes, char* result[], int* size) {
-    *size = 0;
-    for (int i = 0; i < 1000; ++i) {
-        if (nodes[i].NodeName[0] != '\0' && !nodes[i].isFanout) {
-            result[(*size)++] = nodes[i].NodeName;
-        }
-    }
-}
-
-void determine_dff_outputs(struct Node* nodes, char* result[], int* size) {
-    *size = 0;
-    for (int i = 0; i < 1000; ++i) {
-        if (nodes[i].NodeName[0] != '\0' && nodes[i].isDffFanout) {
-            result[(*size)++] = nodes[i].NodeName;
-        }
-    }
-}
-
-void assign_levels(struct GateList* gate_list, struct Node* nodes, char** initial_nodes, int initial_nodes_size, char** dff_output_nodes, int dff_output_nodes_size) {
-    for (int i = 0; i < initial_nodes_size; ++i) {
-        for (int j = 0; j < 1000; ++j) {
-            if (strcmp(nodes[j].NodeName, initial_nodes[i]) == 0) {
-                nodes[j].Level = 0;
-                break;
-            }
-        }
-    }
-
-    for (int i = 0; i < dff_output_nodes_size; ++i) {
-        for (int j = 0; j < 1000; ++j) {
-            if (strcmp(nodes[j].NodeName, dff_output_nodes[i]) == 0) {
-                nodes[j].Level = 0;
-                nodes[j].isDffFanout = 1;
-                break;
-            }
-        }
-    }
-
+void assign_levels(struct GateList* gate_list, struct Node* nodes) {
+    // Set DFF gates and nodes to level 0
     struct GateRecord* current = gate_list->head;
     while (current != NULL) {
-        if (strncmp(current->GateType, "DFF", 3) == 0) {
+        if ((strncmp(current->GateType, "dff1", 3) == 0)||(strncmp(current->GateType, "dff", 3) == 0)) {
             current->Level = 0;
+            if (current->fanout != NULL) {
+                current->fanout->Level = 0;
+                current->fanout->isDffFanout = 1;
+            }
         }
         current = current->next;
     }
 
+    // Assign levels to other gates
     int all_gates_assigned = 0;
     while (!all_gates_assigned) {
         all_gates_assigned = 1;
-        struct GateRecord* current = gate_list->head;
+        current = gate_list->head;
         while (current != NULL) {
             if (current->Level < 0) {
                 int all_assigned = 1;
@@ -240,12 +193,35 @@ void assign_levels(struct GateList* gate_list, struct Node* nodes, char** initia
     }
 }
 
+// ... [Insert existing function implementations for find_gate, add_gate, read_circuit, etc.] ...
+
+void print_level_summary(struct GateList* gate_list) {
+    int level_count[1000] = {0};  // Adjust size as needed
+    int total_gates = 0;
+    struct GateRecord* current = gate_list->head;
+
+    while (current != NULL) {
+        total_gates++;
+        if (current->Level >= 0) {
+            level_count[current->Level]++;
+        }
+        current = current->next;
+    }
+    printf("---------------------------------------------------\n");
+    printf("Total number of gates: %d\n", total_gates);
+    for (int i = 0; i < 1000; i++) {
+        if (level_count[i] > 0) {
+            printf("Level %d: %d gates\n", i, level_count[i]);
+        }
+    }
+}
+
 void print_wires(struct Node* nodes) {
     printf("List of all wires (nodes), their levels, and connected gates:\n");
     for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
-        printf("Wire: %s, Level: %d, Connected Gates: ", nodes[i].NodeName, nodes[i].Level);
+        printf("Wire: %s, Level: %d", nodes[i].NodeName, nodes[i].Level);
         for (int j = 0; j < 50 && nodes[i].gates[j] != NULL; ++j) {
-            printf("%s, ", nodes[i].gates[j]->GateName);
+            //printf("%s, ", nodes[i].gates[j]->GateName);
         }
         printf("\n");
     }
