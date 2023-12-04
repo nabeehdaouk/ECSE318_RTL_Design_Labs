@@ -124,10 +124,31 @@ def print_circuit(gate_list):
         print(f"Gate: {current.GateName}, Type: {current.GateType}, Level: {current.Level}, Fanout: {fanout_name}, Fanin: {fanin_names}")
         current = current.next
 
+def print_level_summary(gate_list):
+    level_count = {}
+    total_gates = 0
+
+    current = gate_list.head
+    while current:
+        total_gates += 1
+        level = current.Level
+        if level not in level_count:
+            level_count[level] = 0
+        level_count[level] += 1
+        current = current.next
+    print("-------------------------------------")
+    print()
+    print(f"Total number of gates: {total_gates}")
+    for level, count in sorted(level_count.items()):
+        print(f"Level {level}: {count} gates")
+
+
 # Example Usage
 gate_list, nodes = read_circuit('S27.txt')  # Replace with the correct path to your file
 input_nodes = determine_inputs(nodes)
 dff_output_nodes = determine_dff_outputs(nodes)
 assign_levels(gate_list, nodes, input_nodes + dff_output_nodes,dff_output_nodes )
 print_circuit(gate_list)
+print("------------------------------------------------------------------------")
 print_wires(nodes)
+print_level_summary(gate_list)
