@@ -77,10 +77,24 @@ def determine_inputs(nodes):
 def determine_dff_outputs(nodes):
     return [node_name for node_name, node in nodes.items() if node.isDffFanout]
 
-def assign_levels(gate_list, nodes, initial_nodes):
+def assign_levels(gate_list, nodes, initial_nodes, dff_output_nodes):
+    # Set initial nodes (input wires) to level 0
     for node_name in initial_nodes:
         if node_name in nodes:
             nodes[node_name].Level = 0
+
+    # Set DFF output nodes to level 0 and ensure they remain unchanged
+    for node_name in dff_output_nodes:
+        if node_name in nodes:
+            nodes[node_name].Level = 0
+            nodes[node_name].isDffFanout = True
+
+    # Set DFF gates to level 0
+    current = gate_list.head
+    while current:
+        if current.GateType.lower().startswith('dff'):
+            current.Level = 0
+        current = current.next
 
     all_gates_assigned = False
     while not all_gates_assigned:
@@ -91,7 +105,7 @@ def assign_levels(gate_list, nodes, initial_nodes):
                 if all(node.Level > -1 for node in current.fanin):
                     highest_fanin_level = max(node.Level for node in current.fanin)
                     current.Level = highest_fanin_level + 1
-                    if current.fanout:
+                    if current.fanout and not current.fanout.isDffFanout:
                         current.fanout.Level = current.Level
                     all_gates_assigned = False
             current = current.next
@@ -114,6 +128,6 @@ def print_circuit(gate_list):
 gate_list, nodes = read_circuit('S27.txt')  # Replace with the correct path to your file
 input_nodes = determine_inputs(nodes)
 dff_output_nodes = determine_dff_outputs(nodes)
-assign_levels(gate_list, nodes, input_nodes + dff_output_nodes)
+assign_levels(gate_list, nodes, input_nodes + dff_output_nodes,dff_output_nodes )
 print_circuit(gate_list)
 print_wires(nodes)
