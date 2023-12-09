@@ -2,79 +2,52 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Define structures
-struct Node {
-    char NodeName[50];
-    struct GateRecord* gates[50];
-    int isFanout;
-    int isDffFanout;
-    int Level;
-    int InputValue; // New field to store input values
-};
-
-struct GateRecord {
+typedef struct GateRecord {
     char GateName[50];
     char GateType[50];
     int Level;
     int output;
     int Number;
-    struct Node* fanout;
-    struct Node* fanin[50];
+    struct GateRecord* fanout;
+    struct Node** fanin;
     struct GateRecord* next;
-};
+    char state;
+} GateRecord;
 
-struct GateList {
+typedef struct Node {
+    char NodeName[50];
+    struct GateRecord** gates;
+    int isFanout;
+    int isDffFanout;
+    int Level;
+    char state;
+} Node;
+
+typedef struct GateList {
     struct GateRecord* head;
-};
+} GateList;
 
-// Function prototypes
-struct GateRecord* find_gate(struct GateList* gate_list, char* name);
-void add_gate(struct GateList* gate_list, struct GateRecord* gate);
-void read_circuit(char* filename, struct GateList* gate_list, struct Node* nodes);
-void assign_levels(struct GateList* gate_list, struct Node* nodes);
-void print_wires(struct Node* nodes);
-void print_circuit(struct GateList* gate_list);
-void print_level_summary(struct GateList* gate_list);
-void find_and_set_output_node(struct GateList* gate_list, struct Node* nodes); // New function prototype
-void simulate_circuit(struct GateList* gate_list, struct Node* nodes); // New function prototype
-
-int main() {
-    struct GateList gate_list = { NULL };
-    struct Node nodes[1000] = { 0 };
-
-    read_circuit("S27.txt", &gate_list, nodes);  // Replace with the correct path to your file
-    assign_levels(&gate_list, nodes);
-
-    print_circuit(&gate_list);
-    print_wires(nodes);
-    print_level_summary(&gate_list);
-
-    // Manually set input values (replace with your specific input nodes)
-    nodes[0].InputValue = 1;  // Example input value for the first input node
-
-    // Simulate the circuit
-    simulate_circuit(&gate_list, nodes);
-
-    // Find and set the output node
-    find_and_set_output_node(&gate_list, nodes);
-
-    // Print the circuit information and simulation results
-    print_circuit(&gate_list);
-    print_wires(nodes);
-    print_level_summary(&gate_list);
-
-    // Retrieve and print the output node value
-    struct Node* output_node = find_gate(&gate_list, "OutputNodeName"); // Replace "OutputNodeName" with the actual name of your output node
-    printf("Output Node Value: %d\n", output_node ? output_node->output : -1);
-
-    return 0;
+GateList* create_gate_list() {
+    GateList* gate_list = (GateList*)malloc(sizeof(GateList));
+    gate_list->head = NULL;
+    return gate_list;
 }
 
-// Function implementations
+void add_gate(GateList* gate_list, GateRecord* gate) {
+    if (gate_list->head == NULL) {
+        gate_list->head = gate;
+    }
+    else {
+        GateRecord* current = gate_list->head;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = gate;
+    }
+}
 
-// Function implementations
-struct GateRecord* find_gate(struct GateList* gate_list, char* name) {
-    struct GateRecord* current = gate_list->head;
+GateRecord* find_gate(GateList* gate_list, char* name) {
+    GateRecord* current = gate_list->head;
     while (current != NULL) {
         if (strcmp(current->GateName, name) == 0) {
             return current;
@@ -84,128 +57,172 @@ struct GateRecord* find_gate(struct GateList* gate_list, char* name) {
     return NULL;
 }
 
-void add_gate(struct GateList* gate_list, struct GateRecord* gate) {
-    if (gate_list->head == NULL) {
-        gate_list->head = gate;
-    } else {
-        struct GateRecord* current = gate_list->head;
-        while (current->next != NULL) {
-            current = current->next;
-        }
-        current->next = gate;
-    }
-}
+typedef struct Circuit {
+    GateList* gate_list;
+    Node** nodes;
+} Circuit;
 
-void read_circuit(char* filename, struct GateList* gate_list, struct Node* nodes) {
-    FILE *file = fopen(filename, "r");
-    if (!file) {
-        perror("Error opening file");
-        exit(EXIT_FAILURE);
+Circuit* read_circuit(char* filename) {
+    Circuit* circuit = (Circuit*)malloc(sizeof(Circuit));
+    circuit->gate_list = create_gate_list();
+    circuit->nodes = (Node**)malloc(sizeof(Node*) * 1000);
+    for (int i = 0; i < 1000; i++) {
+        circuit->nodes[i] = NULL;
     }
-
-    char line[256];
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Failed to open file\n");
+        return circuit;
+    }
+    char line[1000];
     while (fgets(line, sizeof(line), file)) {
-        char gate_type[50], gate_name[50], net_names[256];
-        int result = sscanf(line, "%s %s (%[^)])", gate_type, gate_name, net_names);
-        if (result != 3) {
-            continue;  // Skip lines without the expected format
+        char* parts[3];
+        int part_count = 0;
+        char* token = strtok(line, " ");
+        while (token != NULL) {
+            parts[part_count] = token;
+            part_count++;
+            token = strtok(NULL, " ");
         }
-
-        struct GateRecord* gate = find_gate(gate_list, gate_name);
-        if (!gate) {
-            gate = (struct GateRecord*)malloc(sizeof(struct GateRecord));
+        if (part_count < 3 || strchr(parts[2], '(') == NULL) {
+            continue;
+        }
+        char* gate_type = parts[0];
+        char* gate_name = parts[1];
+        char* net_names[100];
+        int net_count = 0;
+        char* net_token = strtok(parts[2], "();,");
+        while (net_token != NULL) {
+            net_names[net_count] = net_token;
+            net_count++;
+            net_token = strtok(NULL, "();,");
+        }
+        GateRecord* gate = find_gate(circuit->gate_list, gate_name);
+        if (gate == NULL) {
+            gate = (GateRecord*)malloc(sizeof(GateRecord));
             strcpy(gate->GateName, gate_name);
             strcpy(gate->GateType, gate_type);
             gate->Level = -1;
             gate->output = 0;
             gate->Number = 0;
             gate->fanout = NULL;
+            gate->fanin = (Node**)malloc(sizeof(Node*) * net_count);
             gate->next = NULL;
-            add_gate(gate_list, gate);
+            gate->state = 'X';
+            add_gate(circuit->gate_list, gate);
         }
-
-        char* net_name = strtok(net_names, ",");
-        int i = 0;
-        while (net_name != NULL) {
-            struct Node* node = NULL;
-            for (int j = 0; j < 1000; ++j) {
-                if (strcmp(nodes[j].NodeName, net_name) == 0) {
-                    node = &nodes[j];
-                    break;
-                }
+        for (int i = 0; i < net_count; i++) {
+            Node* node = circuit->nodes[atoi(net_names[i])];
+            if (node == NULL) {
+                node = (Node*)malloc(sizeof(Node));
+                strcpy(node->NodeName, net_names[i]);
+                node->gates = (GateRecord**)malloc(sizeof(GateRecord*) * 100);
+                node->isFanout = 0;
+                node->isDffFanout = 0;
+                node->Level = -1;
+                node->state = 'X';
+                circuit->nodes[atoi(net_names[i])] = node;
             }
-
-            if (!node) {
-                for (int j = 0; j < 1000; ++j) {
-                    if (nodes[j].NodeName[0] == '\0') {
-                        strcpy(nodes[j].NodeName, net_name);
-                        node = &nodes[j];
-                        break;
-                    }
-                }
-            }
-
             if (i == 0) {
                 gate->fanout = node;
                 node->isFanout = 1;
-                if ((strncmp(gate_type, "dff1", 3) == 0)||(strncmp(gate_type, "dff", 3) == 0)) {
+                if (strncmp(gate_type, "DFF", 3) == 0) {
                     node->isDffFanout = 1;
                 }
-            } else {
+            }
+            else {
                 gate->fanin[i - 1] = node;
             }
-
-            node->gates[node->isDffFanout ? 0 : node->isFanout ? 1 : 0] = gate;
-            ++i;
-            net_name = strtok(NULL, ",");
+            node->gates[node->isFanout] = gate;
         }
     }
-
     fclose(file);
+    return circuit;
 }
 
-void assign_levels(struct GateList* gate_list, struct Node* nodes) {
-    // Set DFF gates and nodes to level 0
-    struct GateRecord* current = gate_list->head;
+char** determine_inputs(Circuit* circuit) {
+    char** inputs = (char**)malloc(sizeof(char*) * 100);
+    int input_count = 0;
+    for (int i = 0; i < 1000; i++) {
+        Node* node = circuit->nodes[i];
+        if (node != NULL && !node->isFanout) {
+            inputs[input_count] = (char*)malloc(sizeof(char) * 50);
+            strcpy(inputs[input_count], node->NodeName);
+            input_count++;
+        }
+    }
+    return inputs;
+}
+
+char** determine_dff_outputs(Circuit* circuit) {
+    char** dff_outputs = (char**)malloc(sizeof(char*) * 100);
+    int dff_output_count = 0;
+    for (int i = 0; i < 1000; i++) {
+        Node* node = circuit->nodes[i];
+        if (node != NULL && node->isDffFanout) {
+            dff_outputs[dff_output_count] = (char*)malloc(sizeof(char) * 50);
+            strcpy(dff_outputs[dff_output_count], node->NodeName);
+            dff_output_count++;
+        }
+    }
+    return dff_outputs;
+}
+
+void assign_levels(Circuit* circuit, char** initial_nodes, char** dff_output_nodes) {
+    for (int i = 0; i < 100; i++) {
+        Node* node = circuit->nodes[i];
+        if (node != NULL) {
+            node->Level = -1;
+        }
+    }
+    for (int i = 0; i < 100; i++) {
+        char* node_name = initial_nodes[i];
+        Node* node = circuit->nodes[atoi(node_name)];
+        if (node != NULL) {
+            node->Level = 0;
+        }
+    }
+    for (int i = 0; i < 100; i++) {
+        char* node_name = dff_output_nodes[i];
+        Node* node = circuit->nodes[atoi(node_name)];
+        if (node != NULL) {
+            node->Level = 0;
+            node->isDffFanout = 1;
+        }
+    }
+    GateRecord* current = circuit->gate_list->head;
     while (current != NULL) {
-        if ((strncmp(current->GateType, "dff1", 3) == 0)||(strncmp(current->GateType, "dff", 3) == 0)) {
+        if (strncmp(current->GateType, "DFF", 3) == 0) {
             current->Level = 0;
-            if (current->fanout != NULL) {
-                current->fanout->Level = 0;
-                current->fanout->isDffFanout = 1;
-            }
         }
         current = current->next;
     }
-
-    // Assign levels to other gates
     int all_gates_assigned = 0;
     while (!all_gates_assigned) {
         all_gates_assigned = 1;
-        current = gate_list->head;
+        GateRecord* current = circuit->gate_list->head;
         while (current != NULL) {
             if (current->Level < 0) {
-                int all_assigned = 1;
-                for (int i = 0; i < 50 && current->fanin[i] != NULL; ++i) {
-                    if (current->fanin[i]->Level < 0) {
-                        all_assigned = 0;
+                int all_fanin_assigned = 1;
+                for (int i = 0; i < current->fanout->isFanout; i++) {
+                    Node* fanin = current->fanin[i];
+                    if (fanin->Level < 0) {
+                        all_fanin_assigned = 0;
                         break;
                     }
                 }
-
-                if (all_assigned) {
+                if (all_fanin_assigned) {
                     int highest_fanin_level = -1;
-                    for (int i = 0; i < 50 && current->fanin[i] != NULL; ++i) {
-                        if (current->fanin[i]->Level > highest_fanin_level) {
-                            highest_fanin_level = current->fanin[i]->Level;
+                    for (int i = 0; i < current->fanout->isFanout; i++) {
+                        Node* fanin = current->fanin[i];
+                        if (fanin->Level > highest_fanin_level) {
+                            highest_fanin_level = fanin->Level;
                         }
                     }
-
                     current->Level = highest_fanin_level + 1;
-                    if (current->fanout && !current->fanout->isDffFanout) {
+                    if (current->fanout != NULL && !current->fanout->isDffFanout) {
                         current->fanout->Level = current->Level;
                     }
-
                     all_gates_assigned = 0;
                 }
             }
@@ -214,95 +231,372 @@ void assign_levels(struct GateList* gate_list, struct Node* nodes) {
     }
 }
 
-// ... (Insert existing function implementations for find_gate, add_gate, read_circuit, etc.) ...
-
-void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
-    // Simulation logic here
-    // You can simulate gate behavior and calculate the output values of each gate and node
-    // Example code:
-    struct GateRecord* current = gate_list->head;
-    while (current != NULL) {
-        // Simulate gate behavior based on gate type and input node values
-        // Example: current->output = simulate_gate(current->GateType, current->fanin);
-
-        // Update the output node's value
-        if (current->fanout && current->fanout->isFanout) {
-            current->fanout->output = current->output;
+void print_wires(Circuit* circuit) {
+    printf("List of all wires (nodes), their levels, and connected gates:\n");
+    for (int i = 0; i < 1000; i++) {
+        Node* node = circuit->nodes[i];
+        if (node != NULL) {
+            printf("Wire: %s, Level: %d, Connected Gates: ", node->NodeName, node->Level);
+            for (int j = 0; j < node->isFanout; j++) {
+                printf("%s", node->gates[j]->GateName);
+                if (j < node->isFanout - 1) {
+                    printf(", ");
+                }
+            }
+            printf("\n");
         }
+    }
+}
 
+void print_circuit(Circuit* circuit) {
+    printf("Circuit Structure:\n");
+    GateRecord* current = circuit->gate_list->head;
+    while (current != NULL) {
+        printf("Gate: %s, Type: %s, Level: %d, Fanout: %s, Fanin: ", current->GateName, current->GateType, current->Level, current->fanout != NULL ? current->fanout->NodeName : "None");
+        for (int i = 0; i < current->fanout->isFanout; i++) {
+            printf("%s", current->fanout->gates[i]->GateName);
+            if (i < current->fanout->isFanout - 1) {
+                printf(", ");
+            }
+        }
+        printf("\n");
         current = current->next;
     }
 }
 
-void find_and_set_output_node(struct GateList* gate_list, struct Node* nodes) {
-    // Replace "OutputNodeName" with the actual name of your output node
-    char* output_node_name = "OutputNodeName";
-
-    struct Node* output_node = NULL;
-    for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
-        if (strcmp(nodes[i].NodeName, output_node_name) == 0) {
-            output_node = &nodes[i];
-            break;
-        }
+void print_level_summary(Circuit* circuit) {
+    int level_count[100];
+    for (int i = 0; i < 100; i++) {
+        level_count[i] = 0;
     }
-
-    if (output_node) {
-        // Calculate and set the output node value (simulation logic here)
-        // For example, you can use the value of the last gate connected to the output node
-        struct GateRecord* last_gate = output_node->gates[0];
-        if (last_gate) {
-            output_node->output = last_gate->output;
-        } else {
-            // Handle the case where the output node has no gates connected
-            // You may want to set a default value or handle this case differently
-            output_node->output = -1; // Default value
-        }
-    } else {
-        // Handle the case where the output node is not found
-        printf("Output node '%s' not found.\n", output_node_name);
-    }
-}
-
-void print_level_summary(struct GateList* gate_list) {
-    int level_count[1000] = {0};  // Adjust size as needed
     int total_gates = 0;
-    struct GateRecord* current = gate_list->head;
-
+    GateRecord* current = circuit->gate_list->head;
     while (current != NULL) {
         total_gates++;
-        if (current->Level >= 0) {
-            level_count[current->Level]++;
-        }
+        int level = current->Level;
+        level_count[level]++;
         current = current->next;
     }
-    printf("---------------------------------------------------\n");
+    printf("-------------------------------------\n\n");
     printf("Total number of gates: %d\n", total_gates);
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 100; i++) {
         if (level_count[i] > 0) {
             printf("Level %d: %d gates\n", i, level_count[i]);
         }
     }
 }
 
-void print_wires(struct Node* nodes) {
-    printf("List of all wires (nodes), their levels, and connected gates:\n");
-    for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
-        printf("Wire: %s, Level: %d", nodes[i].NodeName, nodes[i].Level);
-        for (int j = 0; j < 50 && nodes[i].gates[j] != NULL; ++j) {
-            //printf("%s, ", nodes[i].gates[j]->GateName);
+char* evaluate_gate(char* gate_type, char* input1, char* input2) {
+    if (strcmp(gate_type, "NOT") == 0) {
+        if (strcmp(input1, "0") == 0) {
+            return "1";
         }
-        printf("\n");
+        else if (strcmp(input1, "1") == 0) {
+            return "0";
+        }
+        else {
+            return "X";
+        }
+    }
+    else if (strcmp(gate_type, "AND") == 0) {
+        if (strcmp(input1, "0") == 0 && strcmp(input2, "0") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "0") == 0 && strcmp(input2, "1") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "0") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "1") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "0") == 0 && strcmp(input2, "X") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "X") == 0 && strcmp(input2, "0") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "X") == 0) {
+            return "X";
+        }
+        else if (strcmp(input1, "X") == 0 && strcmp(input2, "1") == 0) {
+            return "X";
+        }
+        else {
+            return "X";
+        }
+    }
+    else if (strcmp(gate_type, "OR") == 0) {
+        if (strcmp(input1, "0") == 0 && strcmp(input2, "0") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "0") == 0 && strcmp(input2, "1") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "0") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "1") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "0") == 0 && strcmp(input2, "X") == 0) {
+            return "X";
+        }
+        else if (strcmp(input1, "X") == 0 && strcmp(input2, "0") == 0) {
+            return "X";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "X") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "X") == 0 && strcmp(input2, "1") == 0) {
+            return "X";
+        }
+        else {
+            return "X";
+        }
+    }
+    else if (strcmp(gate_type, "XOR") == 0) {
+        if (strcmp(input1, "0") == 0 && strcmp(input2, "0") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "0") == 0 && strcmp(input2, "1") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "0") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "1") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "0") == 0 && strcmp(input2, "X") == 0) {
+            return "X";
+        }
+        else if (strcmp(input1, "X") == 0 && strcmp(input2, "0") == 0) {
+            return "X";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "X") == 0) {
+            return "X";
+        }
+        else if (strcmp(input1, "X") == 0 && strcmp(input2, "1") == 0) {
+            return "X";
+        }
+        else {
+            return "X";
+        }
+    }
+    else if (strcmp(gate_type, "NOR") == 0) {
+        if (strcmp(input1, "0") == 0 && strcmp(input2, "0") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "0") == 0 && strcmp(input2, "1") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "0") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "1") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "0") == 0 && strcmp(input2, "X") == 0) {
+            return "X";
+        }
+        else if (strcmp(input1, "X") == 0 && strcmp(input2, "0") == 0) {
+            return "X";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "X") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "X") == 0 && strcmp(input2, "1") == 0) {
+            return "0";
+        }
+        else {
+            return "X";
+        }
+    }
+    else if (strcmp(gate_type, "NAND") == 0) {
+        if (strcmp(input1, "0") == 0 && strcmp(input2, "0") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "0") == 0 && strcmp(input2, "1") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "0") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "1") == 0) {
+            return "0";
+        }
+        else if (strcmp(input1, "0") == 0 && strcmp(input2, "X") == 0) {
+            return "X";
+        }
+        else if (strcmp(input1, "X") == 0 && strcmp(input2, "0") == 0) {
+            return "X";
+        }
+        else if (strcmp(input1, "1") == 0 && strcmp(input2, "X") == 0) {
+            return "1";
+        }
+        else if (strcmp(input1, "X") == 0 && strcmp(input2, "1") == 0) {
+            return "1";
+        }
+        else {
+            return "X";
+        }
+    }
+    else {
+        return NULL;
     }
 }
 
-void print_circuit(struct GateList* gate_list) {
-    struct GateRecord* current = gate_list->head;
-    while (current != NULL) {
-        printf("Gate: %s, Type: %s, Level: %d, Fanout: %s, Fanin: ", current->GateName, current->GateType, current->Level, current->fanout ? current->fanout->NodeName : "None");
-        for (int i = 0; i < 50 && current->fanin[i] != NULL; ++i) {
-            printf("%s, ", current->fanin[i]->NodeName);
+void propagate_states(Circuit* circuit) {
+    int changes = 1;
+    while (changes) {
+        changes = 0;
+        GateRecord* current = circuit->gate_list->head;
+        while (current != NULL) {
+            if (strcmp(current->GateType, "NOT") == 0 || strcmp(current->GateType, "AND") == 0 || strcmp(current->GateType, "OR") == 0 || strcmp(current->GateType, "XOR") == 0 || strcmp(current->GateType, "NOR") == 0 || strcmp(current->GateType, "NAND") == 0) {
+                char* new_state = evaluate_gate(current->GateType, current->fanin[0]->state, current->fanin[1] != NULL ? current->fanin[1]->state : NULL);
+                if (new_state != NULL && strcmp(new_state, &current->state) != 0) {
+                    current->state = *new_state;
+                    changes = 1;
+                }
+            }
+            current = current->next;
         }
-        printf("\n");
+    }
+}
+
+void update_dff_states(Circuit* circuit, char** dff_output_nodes) {
+    GateRecord* current = circuit->gate_list->head;
+    while (current != NULL) {
+        if (strncmp(current->GateType, "DFF", 3) == 0) {
+            Node* input_node = current->fanin[0];
+            char* input_value = input_node != NULL ? &input_node->state : "Unknown";
+            printf("Gate %s (%s): State = %c, input = %s\n", current->GateName, current->GateType, current->state, input_value);
+            if (input_node != NULL) {
+                current->state = input_node->state;
+                for (int i = 0; i < 1000; i++) {
+                    Node* node = circuit->nodes[i];
+                    if (node != NULL && node->isFanout && node->isDffFanout) {
+                        node->state = current->state;
+                    }
+                }
+            }
+        }
         current = current->next;
     }
 }
+
+void prompt_for_inputs(Circuit* circuit, char** input_nodes) {
+    for (int i = 0; i < 100; i++) {
+        char* node_name = input_nodes[i];
+        Node* node = circuit->nodes[atoi(node_name)];
+        if (node != NULL) {
+            char value[10];
+            printf("Enter value for input %s (0, 1, X): ", node_name);
+            scanf("%s", value);
+            while (strcmp(value, "0") != 0 && strcmp(value, "1") != 0 && strcmp(value, "X") != 0) {
+                printf("Invalid input. Please enter 0, 1, or X.\n");
+                printf("Enter value for input %s (0, 1, X): ", node_name);
+                scanf("%s", value);
+            }
+            node->state = value[0];
+        }
+    }
+}
+
+void print_circuit_state(Circuit* circuit) {
+    GateRecord* current = circuit->gate_list->head;
+    while (current != NULL) {
+        printf("Gate %s (%s): State = %c\n", current->GateName, current->GateType, current->state);
+        current = current->next;
+    }
+}
+
+void simulate_circuit(char* filename) {
+    Circuit* circuit = read_circuit(filename);
+    char** input_nodes = determine_inputs(circuit);
+    char** dff_output_nodes = determine_dff_outputs(circuit);
+    assign_levels(circuit, input_nodes, dff_output_nodes);
+    print_circuit(circuit);
+    printf("------------------------------------------------------------------------\n");
+    print_level_summary(circuit);
+    printf("------------------------------------------------------------------------\n");
+    printf("STARTING SIMULATION\n");
+    char run_simulation[10];
+    printf("Do you want to run the simulation? (y/n): ");
+    scanf("%s", run_simulation);
+    if (strcmp(run_simulation, "y") != 0) {
+        return;
+    }
+    circuit = read_circuit(filename);
+    input_nodes = determine_inputs(circuit);
+    dff_output_nodes = determine_dff_outputs(circuit);
+    assign_levels(circuit, input_nodes, dff_output_nodes);
+    int max_level = -1;
+    for (int i = 0; i < 1000; i++) {
+        Node* node = circuit->nodes[i];
+        if (node != NULL && node->Level > max_level) {
+            max_level = node->Level;
+        }
+    }
+    while (1) {
+        prompt_for_inputs(circuit, input_nodes);
+        for (int i = 0; i < 100; i++) {
+            char* node_name = dff_output_nodes[i];
+            Node* node = circuit->nodes[atoi(node_name)];
+            if (node != NULL) {
+                node->state = node->gates[0]->state;
+            }
+        }
+        for (int level = 0; level <= max_level; level++) {
+            GateRecord* current = circuit->gate_list->head;
+            while (current != NULL) {
+                if (current->Level == level) {
+                    if (strcmp(current->GateType, "NOT") == 0 || strcmp(current->GateType, "AND") == 0 || strcmp(current->GateType, "OR") == 0 || strcmp(current->GateType, "XOR") == 0 || strcmp(current->GateType, "NOR") == 0 || strcmp(current->GateType, "NAND") == 0) {
+                        char* new_state = evaluate_gate(current->GateType, current->fanin[0]->state, current->fanin[1] != NULL ? current->fanin[1]->state : NULL);
+                        if (new_state != NULL && strcmp(new_state, &current->state) != 0) {
+                            current->state = *new_state;
+                        }
+                    }
+                    if (current->fanout != NULL && !current->fanout->isDffFanout) {
+                        current->fanout->state = current->state;
+                    }
+                }
+                current = current->next;
+            }
+        }
+        GateRecord* current = circuit->gate_list->head;
+        while (current != NULL) {
+            if (strncmp(current->GateType, "DFF", 3) == 0) {
+                Node* input_node = current->fanin[0];
+                char* input_value = input_node != NULL ? &input_node->state : "Unknown";
+                printf("Gate %s (%s): State = %c, input = %s\n", current->GateName, current->GateType, current->state, input_value);
+                if (input_node != NULL) {
+                    current->state = input_node->state;
+                }
+            }
+            current = current->next;
+        }
+        printf("Node values after this input cycle:\n");
+        for (int i = 0; i < 1000; i++) {
+            Node* node = circuit->nodes[i];
+            if (node != NULL) {
+                printf("Node %s: State = %c\n", node->NodeName, node->state);
+            }
+        }
+        char continue_simulation[10];
+        printf("Continue simulation? (y/n): ");
+        scanf("%s", continue_simulation);
+        if (strcmp(continue_simulation, "y") != 0) {
+            return;
+        }
+    }
+}
+
+int main() {
+    simulate_circuit("S27.txt");
+    return 0;
+}
+
+
