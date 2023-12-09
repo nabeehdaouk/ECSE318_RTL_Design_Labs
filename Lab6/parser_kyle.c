@@ -9,6 +9,7 @@ struct Node {
     int isFanout;
     int isDffFanout;
     int Level;
+    struct Node* next;
 };
 
 struct GateRecord {
@@ -18,7 +19,7 @@ struct GateRecord {
     int output;
     int Number;
     struct Node* fanout;
-    struct Node* fanin[50];
+    struct Node** fanin[50];
     struct GateRecord* next;
 };
 
@@ -39,7 +40,7 @@ int main() {
     struct GateList gate_list = { NULL };
     struct Node nodes[1000] = { 0 };
 
-    read_circuit("S27.txt", &gate_list, nodes);  // Replace with the correct path to your file
+    read_circuit("S35.txt", &gate_list, nodes);  // Replace with the correct path to your file
     assign_levels(&gate_list, nodes);
 
     print_circuit(&gate_list);

@@ -2,7 +2,7 @@ module memory(
     input clk,
     input [11:0] address,
     input mem_en,
-    input read_write, //high indicates read in, low indicates write out
+    input read_write, //high indicates read in, low indicates write out_
     input [31:0] data_in,
     input clr_mem,
     output reg [31:0] data_out
