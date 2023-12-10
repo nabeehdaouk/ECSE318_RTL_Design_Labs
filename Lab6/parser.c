@@ -326,7 +326,7 @@ char evaluate(struct GateRecord* gate) {
         if (gate->state != '0' && gate->state != '1') {
             gate->state = 'X';
         }
-        printf("Result for DFF Gate %s: State = %c\n", gate->GateName, gate->state);
+        //printf("DFF State %s: State = %c\n", gate->GateName, gate->state);
     }
     return result;
 }
@@ -335,10 +335,12 @@ void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
     char input;
     int continueSimulation = 1;
 
+    // Array to store the next state of DFF gates
+    char dffNextState[1000] = { 0 };
+
     while (continueSimulation) {
         // Prompt for input values
-        printf("---------------------------------------------------\n");
-        printf("\n");
+        printf("---------------------------------------------------\n\n");
         printf("Enter values for inputs (0, 1, X).\n");
         for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
             if (!nodes[i].isFanout) {
@@ -359,7 +361,24 @@ void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
             current->state = evaluate(current);
             if (current->fanout != NULL) {
                 current->fanout->state = current->state;
-                //printf("Gate %s evaluated to %c, updating node %s to %c\n", current->GateName, current->state, current->fanout->NodeName, current->fanout->state);
+            }
+            if (strcmp(current->GateType, "dff") == 0 || strcmp(current->GateType, "dff1") == 0) {
+                dffNextState[current->Number] = current->state; // Capture next state for DFF gates
+            }
+            current = current->next;
+        }
+
+        // Print DFF fanout states after evaluating gates
+        printf("\n");
+        printf("DFF STATES:\n");
+        current = gate_list->head;
+        while (current != NULL) {
+            if (strcmp(current->GateType, "dff") == 0 || strcmp(current->GateType, "dff1") == 0) {
+               char fanoutState = 'X'; // Default to 'X'
+        if (current->fanout != NULL && current->fanout->state != '\0') {
+            fanoutState = current->fanout->state;
+        }
+        printf("DFF State %s: State = %c\n", current->GateName, fanoutState);
             }
             current = current->next;
         }
