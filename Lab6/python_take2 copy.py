@@ -304,8 +304,6 @@ def simulate_circuit(filename):
             return
 
 
-
-
 # Call the simulation function with the file path
 simulate_circuit('S27.txt')  # Replace with the correct file path
 
