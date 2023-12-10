@@ -2,14 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Define structures
 struct Node {
     char NodeName[50];
     struct GateRecord* gates[50];
     int isFanout;
     int isDffFanout;
     int Level;
-    char state; // Add state field
+    char state; 
 };
 
 struct GateRecord {
@@ -21,14 +20,13 @@ struct GateRecord {
     struct Node* fanout;
     struct Node* fanin[50];
     struct GateRecord* next;
-    char state; // Add state field
+    char state; 
 };
 
 struct GateList {
     struct GateRecord* head;
 };
 
-// Function prototypes
 struct GateRecord* find_gate(struct GateList* gate_list, char* name);
 void add_gate(struct GateList* gate_list, struct GateRecord* gate);
 void read_circuit(char* filename, struct GateList* gate_list, struct Node* nodes);
@@ -51,15 +49,12 @@ int main() {
     print_wires(nodes);
     print_level_summary(&gate_list);
 
-    // Run simulation
+
     simulate_circuit(&gate_list, nodes);
 
     return 0;
 }
 
-// Function implementations
-
-// Function implementations
 struct GateRecord* find_gate(struct GateList* gate_list, char* name) {
     struct GateRecord* current = gate_list->head;
     while (current != NULL) {
@@ -95,7 +90,7 @@ void read_circuit(char* filename, struct GateList* gate_list, struct Node* nodes
         char gate_type[50], gate_name[50], net_names[256];
         int result = sscanf(line, "%s %s (%[^)])", gate_type, gate_name, net_names);
         if (result != 3) {
-            continue;  // Skip lines without the expected format
+            continue;  
         }
 
         struct GateRecord* gate = find_gate(gate_list, gate_name);
@@ -165,7 +160,7 @@ void assign_levels(struct GateList* gate_list, struct Node* nodes) {
         current = current->next;
     }
 
-    // Assign levels to other gates
+    // Assign levels
     int all_gates_assigned = 0;
     while (!all_gates_assigned) {
         all_gates_assigned = 1;
@@ -201,10 +196,8 @@ void assign_levels(struct GateList* gate_list, struct Node* nodes) {
     }
 }
 
-// ... [Insert existing function implementations for find_gate, add_gate, read_circuit, etc.] ...
-
 void print_level_summary(struct GateList* gate_list) {
-    int level_count[1000] = {0};  // Adjust size as needed
+    int level_count[1000] = {0}; 
     int total_gates = 0;
     struct GateRecord* current = gate_list->head;
 
@@ -225,11 +218,10 @@ void print_level_summary(struct GateList* gate_list) {
 }
 
 void print_wires(struct Node* nodes) {
-    printf("List of all wires (nodes), their levels, and connected gates:\n");
+    printf("List of all wires (nodes), their levels:\n");
     for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
         printf("Wire: %s, Level: %d", nodes[i].NodeName, nodes[i].Level);
         for (int j = 0; j < 50 && nodes[i].gates[j] != NULL; ++j) {
-            //printf("%s, ", nodes[i].gates[j]->GateName);
         }
         printf("\n");
     }
@@ -247,17 +239,14 @@ void print_circuit(struct GateList* gate_list) {
     }
 }
 
-// Helper function to interpret the state
 int state_to_bool(char state) {
-    return state == '1' ? 1 : state == '0' ? 0 : -1; // -1 for 'X' (undefined)
+    return state == '1' ? 1 : state == '0' ? 0 : -1; 
 }
 char evaluate(struct GateRecord* gate) {
-    //printf("Evaluating Gate: %s, Type: %s\n", gate->GateName, gate->GateType);
 
-    char result = 'X'; // Default to 'X'
+    char result = 'X'; 
     if (strcmp(gate->GateType, "and") == 0) {
         // AND gate logic
-        // Assuming two-input logic gates for simplicity
         if (gate->fanin[0]->state == '0' || gate->fanin[1]->state == '0') {
             result = '0';
         } else if (gate->fanin[0]->state == '1' && gate->fanin[1]->state == '1') {
@@ -312,21 +301,18 @@ char evaluate(struct GateRecord* gate) {
         }
     } else if (strcmp(gate->GateType, "dff") == 0 || strcmp(gate->GateType, "dff1") == 0) {
     // DFF gate logic
-    // For simplicity, assume the output is updated to the input state in each cycle
     if (gate->fanin[0] != NULL) {
-        result = gate->fanin[0]->state; // Output same as input state
+        result = gate->fanin[0]->state; 
     } else {
         printf("Error: DFF gate %s has no input\n", gate->GateName);
-        result = 'X'; // Undefined if no input
+        result = 'X'; 
     }
 }
 
   if (strcmp(gate->GateType, "dff") == 0 || strcmp(gate->GateType, "dff1") == 0) {
-        // Check if the state is not set and assign 'X' if so
         if (gate->state != '0' && gate->state != '1') {
             gate->state = 'X';
         }
-        //printf("DFF State %s: State = %c\n", gate->GateName, gate->state);
     }
     return result;
 }
@@ -335,11 +321,9 @@ void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
     char input;
     int continueSimulation = 1;
 
-    // Array to store the next state of DFF gates
     char dffNextState[1000] = { 0 };
 
     while (continueSimulation) {
-        // Prompt for input values
         printf("---------------------------------------------------\n\n");
         printf("Enter values for inputs (0, 1, X).\n");
         for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
@@ -350,12 +334,11 @@ void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
                     nodes[i].state = input;
                 } else {
                     printf("Invalid input. Please enter 0, 1, or X.\n");
-                    i--; // Ask for the same input again
+                    i--; 
                 }
             }
         }
 
-        // Evaluate all gates and update fanout node states
         struct GateRecord* current = gate_list->head;
         while (current != NULL) {
             current->state = evaluate(current);
@@ -363,18 +346,17 @@ void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
                 current->fanout->state = current->state;
             }
             if (strcmp(current->GateType, "dff") == 0 || strcmp(current->GateType, "dff1") == 0) {
-                dffNextState[current->Number] = current->state; // Capture next state for DFF gates
+                dffNextState[current->Number] = current->state; 
             }
             current = current->next;
         }
 
-        // Print DFF fanout states after evaluating gates
         printf("\n");
         printf("DFF STATES:\n");
         current = gate_list->head;
         while (current != NULL) {
             if (strcmp(current->GateType, "dff") == 0 || strcmp(current->GateType, "dff1") == 0) {
-               char fanoutState = 'X'; // Default to 'X'
+               char fanoutState = 'X'; 
         if (current->fanout != NULL && current->fanout->state != '\0') {
             fanoutState = current->fanout->state;
         }
@@ -387,13 +369,12 @@ void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
         printf("Node States:\n");
         for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
             char stateToPrint = nodes[i].state;
-            if (stateToPrint == '\0') { // If no state, print 'X'
+            if (stateToPrint == '\0') { 
                 stateToPrint = 'X';
             }
             printf("Node %s: State = %c\n", nodes[i].NodeName, stateToPrint);
         }
 
-        // Check if the user wants to continue the simulation
         printf("Continue simulation? (1 for yes, 0 for no): ");
         scanf("%d", &continueSimulation);
         if (continueSimulation != 1) {
