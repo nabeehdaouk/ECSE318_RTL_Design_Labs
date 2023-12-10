@@ -36,7 +36,9 @@ void assign_levels(struct GateList* gate_list, struct Node* nodes);
 void print_wires(struct Node* nodes);
 void print_circuit(struct GateList* gate_list);
 void print_level_summary(struct GateList* gate_list);
-void simulate_circuit(struct GateList* gate_list, struct Node* nodes); // Add this line
+void simulate_circuit(struct GateList* gate_list, struct Node* nodes);
+
+
 
 int main() {
     struct GateList gate_list = { NULL };
@@ -249,68 +251,87 @@ void print_circuit(struct GateList* gate_list) {
 int state_to_bool(char state) {
     return state == '1' ? 1 : state == '0' ? 0 : -1; // -1 for 'X' (undefined)
 }
-
-// Evaluate function for two-input gates with 3-valued logic
-char evaluate_two_input_gate(char gateType, char input1, char input2) {
-    int state1 = state_to_bool(input1);
-    int state2 = state_to_bool(input2);
-
-    if (gateType == 'A') { // AND
-        if (state1 == 0 || state2 == 0) return '0';
-        if (state1 == 1 && state2 == 1) return '1';
-        return 'X';
-    } else if (gateType == 'O') { // OR
-        if (state1 == 1 || state2 == 1) return '1';
-        if (state1 == 0 && state2 == 0) return '0';
-        return 'X';
-    } else if (gateType == 'X') { // XOR
-        if (state1 == -1 || state2 == -1) return 'X';
-        return (state1 != state2) ? '1' : '0';
-    } else if (gateType == 'N') { // NAND
-        if (state1 == 0 || state2 == 0) return '1';
-        if (state1 == 1 && state2 == 1) return '0';
-        return 'X';
-    } else if (gateType == 'R') { // NOR
-        if (state1 == 1 || state2 == 1) return '0';
-        if (state1 == 0 && state2 == 0) return '1';
-        return 'X';
-    }
-
-    return 'X'; // Default case, should not happen
-}
-
 char evaluate(struct GateRecord* gate) {
-    char gateType = 'U'; // U for Undefined, should be replaced with actual type logic
+    printf("Evaluating Gate: %s, Type: %s\n", gate->GateName, gate->GateType);
 
-    if (strcmp(gate->GateType, "AND") == 0) {
-        gateType = 'A';
-    } else if (strcmp(gate->GateType, "OR") == 0) {
-        gateType = 'O';
-    } else if (strcmp(gate->GateType, "XOR") == 0) {
-        gateType = 'X';
-    } else if (strcmp(gate->GateType, "NAND") == 0) {
-        gateType = 'N';
-    } else if (strcmp(gate->GateType, "NOR") == 0) {
-        gateType = 'R';
-    } else if (strcmp(gate->GateType, "NOT") == 0) {
-        char inputState = gate->fanin[0]->state;
-        return inputState == '1' ? '0' : inputState == '0' ? '1' : 'X';
+    char result = 'X'; // Default to 'X'
+    if (strcmp(gate->GateType, "and") == 0) {
+        // AND gate logic
+        // Assuming two-input logic gates for simplicity
+        if (gate->fanin[0]->state == '0' || gate->fanin[1]->state == '0') {
+            result = '0';
+        } else if (gate->fanin[0]->state == '1' && gate->fanin[1]->state == '1') {
+            result = '1';
+        } else {
+            result = 'X';
+        }
+    } else if (strcmp(gate->GateType, "or") == 0) {
+        // OR gate logic
+        if (gate->fanin[0]->state == '1' || gate->fanin[1]->state == '1') {
+            result = '1';
+        } else if (gate->fanin[0]->state == '0' && gate->fanin[1]->state == '0') {
+            result = '0';
+        } else {
+            result = 'X';
+        }
+    } else if (strcmp(gate->GateType, "xor") == 0) {
+        // XOR gate logic
+        if (gate->fanin[0]->state == 'X' || gate->fanin[1]->state == 'X') {
+            result = 'X';
+        } else if (gate->fanin[0]->state != gate->fanin[1]->state) {
+            result = '1';
+        } else {
+            result = '0';
+        }
+    } else if (strcmp(gate->GateType, "nand") == 0) {
+        // NAND gate logic
+        if (gate->fanin[0]->state == '0' || gate->fanin[1]->state == '0') {
+            result = '1';
+        } else if (gate->fanin[0]->state == '1' && gate->fanin[1]->state == '1') {
+            result = '0';
+        } else {
+            result = 'X';
+        }
+    } else if (strcmp(gate->GateType, "nor") == 0) {
+        // NOR gate logic
+        if (gate->fanin[0]->state == '1' || gate->fanin[1]->state == '1') {
+            result = '0';
+        } else if (gate->fanin[0]->state == '0' && gate->fanin[1]->state == '0') {
+            result = '1';
+        } else {
+            result = 'X';
+        }
+    } else if (strcmp(gate->GateType, "not") == 0) {
+        // NOT gate logic
+        if (gate->fanin[0]->state == '1') {
+            result = '0';
+        } else if (gate->fanin[0]->state == '0') {
+            result = '1';
+        } else {
+            result = 'X';
+        }
+    } else if (strcmp(gate->GateType, "dff") == 0 || strcmp(gate->GateType, "dff1") == 0) {
+    // DFF gate logic
+    // For simplicity, assume the output is updated to the input state in each cycle
+    if (gate->fanin[0] != NULL) {
+        result = gate->fanin[0]->state; // Output same as input state
+    } else {
+        printf("Error: DFF gate %s has no input\n", gate->GateName);
+        result = 'X'; // Undefined if no input
     }
-
-    // For gates with two inputs
-    if (gateType != 'U' && gate->fanin[0] != NULL && gate->fanin[1] != NULL) {
-        return evaluate_two_input_gate(gateType, gate->fanin[0]->state, gate->fanin[1]->state);
-    }
-
-    return 'X'; // Default case
 }
+
+    printf("Result for Gate %s: State = %c\n", gate->GateName, result);
+    return result;
+}
+
 void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
     char input;
     int continueSimulation = 1;
 
     while (continueSimulation) {
         // Prompt for input values
-        printf("Enter values for inputs (0, 1, X). Type 'end' to stop simulation.\n");
+        printf("Enter values for inputs (0, 1, X).\n");
         for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
             if (!nodes[i].isFanout) {
                 printf("Enter value for input %s (0, 1, X): ", nodes[i].NodeName);
@@ -324,19 +345,21 @@ void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
             }
         }
 
-        // Evaluate all gates
+        // Evaluate all gates and update fanout node states
         struct GateRecord* current = gate_list->head;
         while (current != NULL) {
             current->state = evaluate(current);
+            if (current->fanout != NULL) {
+                current->fanout->state = current->state;
+                printf("Gate %s evaluated to %c, updating node %s to %c\n", current->GateName, current->state, current->fanout->NodeName, current->fanout->state);
+            }
             current = current->next;
         }
 
-        // Print circuit state
-        printf("Circuit State:\n");
-        current = gate_list->head;
-        while (current != NULL) {
-            printf("Gate %s (%s): State = %c\n", current->GateName, current->GateType, current->state);
-            current = current->next;
+        // Print node states
+        printf("Node States:\n");
+        for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
+            printf("Node %s: State = %c\n", nodes[i].NodeName, nodes[i].state);
         }
 
         // Check if the user wants to continue the simulation
