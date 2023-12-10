@@ -252,7 +252,7 @@ int state_to_bool(char state) {
     return state == '1' ? 1 : state == '0' ? 0 : -1; // -1 for 'X' (undefined)
 }
 char evaluate(struct GateRecord* gate) {
-    printf("Evaluating Gate: %s, Type: %s\n", gate->GateName, gate->GateType);
+    //printf("Evaluating Gate: %s, Type: %s\n", gate->GateName, gate->GateType);
 
     char result = 'X'; // Default to 'X'
     if (strcmp(gate->GateType, "and") == 0) {
@@ -321,7 +321,13 @@ char evaluate(struct GateRecord* gate) {
     }
 }
 
-    printf("Result for Gate %s: State = %c\n", gate->GateName, result);
+  if (strcmp(gate->GateType, "dff") == 0 || strcmp(gate->GateType, "dff1") == 0) {
+        // Check if the state is not set and assign 'X' if so
+        if (gate->state != '0' && gate->state != '1') {
+            gate->state = 'X';
+        }
+        printf("Result for DFF Gate %s: State = %c\n", gate->GateName, gate->state);
+    }
     return result;
 }
 
@@ -331,6 +337,8 @@ void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
 
     while (continueSimulation) {
         // Prompt for input values
+        printf("---------------------------------------------------\n");
+        printf("\n");
         printf("Enter values for inputs (0, 1, X).\n");
         for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
             if (!nodes[i].isFanout) {
@@ -351,7 +359,7 @@ void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
             current->state = evaluate(current);
             if (current->fanout != NULL) {
                 current->fanout->state = current->state;
-                printf("Gate %s evaluated to %c, updating node %s to %c\n", current->GateName, current->state, current->fanout->NodeName, current->fanout->state);
+                //printf("Gate %s evaluated to %c, updating node %s to %c\n", current->GateName, current->state, current->fanout->NodeName, current->fanout->state);
             }
             current = current->next;
         }
@@ -359,7 +367,11 @@ void simulate_circuit(struct GateList* gate_list, struct Node* nodes) {
         // Print node states
         printf("Node States:\n");
         for (int i = 0; i < 1000 && nodes[i].NodeName[0] != '\0'; ++i) {
-            printf("Node %s: State = %c\n", nodes[i].NodeName, nodes[i].state);
+            char stateToPrint = nodes[i].state;
+            if (stateToPrint == '\0') { // If no state, print 'X'
+                stateToPrint = 'X';
+            }
+            printf("Node %s: State = %c\n", nodes[i].NodeName, stateToPrint);
         }
 
         // Check if the user wants to continue the simulation
